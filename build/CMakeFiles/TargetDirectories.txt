@@ -1,2 +1,4 @@
-/home/xiaorenbo/share/HPServer/build/CMakeFiles/edit_cache.dir
-/home/xiaorenbo/share/HPServer/build/CMakeFiles/rebuild_cache.dir
+/home/xiaorenbo/share/HPGS/build/CMakeFiles/HPGS.dir
+/home/xiaorenbo/share/HPGS/build/CMakeFiles/test.dir
+/home/xiaorenbo/share/HPGS/build/CMakeFiles/edit_cache.dir
+/home/xiaorenbo/share/HPGS/build/CMakeFiles/rebuild_cache.dir

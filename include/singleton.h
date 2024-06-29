@@ -33,7 +33,7 @@ public:
     /**
      * @brief 返回单例指针
      */
-    staitc T* GetInstance(){
+    static T* GetInstance(){
         static T v;
         return &v;
     }

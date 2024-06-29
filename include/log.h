@@ -36,22 +36,22 @@
 /**
  * @brief 使用流方式将日志级别info的日志写到logger
  */
-#define HPGS_LOG_DEBUG(logger) HPGS_LOG_LEVEL(logger, HPGS::LogLevel::INFO);
+#define HPGS_LOG_INFO(logger) HPGS_LOG_LEVEL(logger, HPGS::LogLevel::INFO);
 
 /**
  * @brief 使用流方式将日志级别warning的日志写到logger
  */
-#define HPGS_LOG_DEBUG(logger) HPGS_LOG_LEVEL(logger, HPGS::LogLevel::WARNING);
+#define HPGS_LOG_WARNING(logger) HPGS_LOG_LEVEL(logger, HPGS::LogLevel::WARNING);
 
 /**
  * @brief 使用流方式将日志级别error的日志写到logger
  */
-#define HPGS_LOG_DEBUG(logger) HPGS_LOG_LEVEL(logger, HPGS::LogLevel::ERROR);
+#define HPGS_LOG_ERROR(logger) HPGS_LOG_LEVEL(logger, HPGS::LogLevel::ERROR);
 
 /**
  * @brief 使用流方式将日志级别fatal的日志写到logger
  */
-#define HPGS_LOG_DEBUG(logger) HPGS_LOG_LEVEL(logger, HPGS::LogLevel::FATAL);
+#define HPGS_LOG_FATAL(logger) HPGS_LOG_LEVEL(logger, HPGS::LogLevel::FATAL);
 
 /**
  * @brief 使用格式化方式将日志级别level的日志写入到logger
@@ -60,7 +60,7 @@
     if(logger->getLevel() <= level) \
         HPGS::LogEventWrap(HPGS::LogEvent::ptr(new HPGS::LogEvent(logger, level, \
                             __FILE__, __LINE__, 0, HPGS::GetThreadId(), \
-                        HPGS::GetFibreId(), time(0), HPGS::THREAD::GetName()))).getEvent()->format(fmt, __VA_ATGS__)
+                        HPGS::GetFibreId(), time(0), HPGS::THREAD::GetName()))).getEvent()->format(fmt, __VA_ARGS__)
 
 /**
  * @brief 使用格式化方式将日志级别debug的日志写入到logger
@@ -70,22 +70,22 @@
 /**
  * @brief 使用格式化方式将日志级别info的日志写入到logger
  */
-#define HPGS_LOG_FMT_DEBUG(logger, fmt, ...) HPGS_LOG_FMT_LEVEL(logger, HPGS::LogLevel::INFO, fmt, __VA_ARGS)
+#define HPGS_LOG_FMT_INFO(logger, fmt, ...) HPGS_LOG_FMT_LEVEL(logger, HPGS::LogLevel::INFO, fmt, __VA_ARGS)
 
 /**
  * @brief 使用格式化方式将日志级别warning的日志写入到logger
  */
-#define HPGS_LOG_FMT_DEBUG(logger, fmt, ...) HPGS_LOG_FMT_LEVEL(logger, HPGS::LogLevel::WARNING, fmt, __VA_ARGS)
+#define HPGS_LOG_FMT_WARNING(logger, fmt, ...) HPGS_LOG_FMT_LEVEL(logger, HPGS::LogLevel::WARNING, fmt, __VA_ARGS)
 
 /**
  * @brief 使用格式化方式将日志级别error的日志写入到logger
  */
-#define HPGS_LOG_FMT_DEBUG(logger, fmt, ...) HPGS_LOG_FMT_LEVEL(logger, HPGS::LogLevel::ERROR, fmt, __VA_ARGS)
+#define HPGS_LOG_FMT_ERROR(logger, fmt, ...) HPGS_LOG_FMT_LEVEL(logger, HPGS::LogLevel::ERROR, fmt, __VA_ARGS)
 
 /**
  * @brief 使用格式化方式将日志级别fatal的日志写入到logger
  */
-#define HPGS_LOG_FMT_DEBUG(logger, fmt, ...) HPGS_LOG_FMT_LEVEL(logger, HPGS::LogLevel::FATAL, fmt, __VA_ARGS)
+#define HPGS_LOG_FMT_FATAL(logger, fmt, ...) HPGS_LOG_FMT_LEVEL(logger, HPGS::LogLevel::FATAL, fmt, __VA_ARGS)
 
 /**
  * @brief 获取主日志器
@@ -97,6 +97,14 @@
  */
 #define HPGS_LOG_NAME(name) HPGS::LoggerMgr::GetInstance()->getLogger(name)
 
+/**
+ * @brief 通过logger和event实例写日志信息
+ */
+#define HPGS_WRITE_LOG(logger, event, message) \
+        if(logger->getLevel() <= event->getLevel()) {\
+            event->setContent(message); \
+            logger->log(event->getLevel(), event);  \
+        }
 
 namespace HPGS{
 
@@ -149,7 +157,7 @@ public:
      * @param[in] time      日志时间(s)
      * @param[in] thread_bane   线程名称
      */
-    LogEvent(Logger::ptr logger, LogLevel::Level level,
+    LogEvent(std::shared_ptr<Logger> logger, LogLevel::Level level,
              const char* file, int32_t line, uint32_t elapse,
              uint32_t thread_id, uint32_t fibre_id, uint64_t time,
              const std::string& thread_name);
@@ -162,9 +170,10 @@ public:
     uint64_t getTime() const { return m_time; }
     const std::string& getThreadNmae() const { return m_threadName; }
     const std::string& getContent() const { return m_content; }
-    Logger::ptr getLogger() const { return m_logger; }
+    std::shared_ptr<Logger> getLogger() const { return m_logger; }
     LogLevel::Level getLevel() const { return m_level; }
-    std::stringstream& getSS() {return m_ss; }
+    std::stringstream& getSS() { return m_ss; }
+    void setContent(const std::string& str) { m_content = str; }
 
     /**
      * @brief 格式化写入日志内容
@@ -181,7 +190,7 @@ private:
     uint64_t m_time = 0;                //时间戳
     std::string m_threadName;           //线程名
     std::string m_content;              //日志内容
-    Logger::ptr m_logger;               //日志器
+    std::shared_ptr<Logger> m_logger;               //日志器
     LogLevel::Level m_level;            //日志级别
     std::stringstream m_ss;             //日志字符串流
 };
@@ -249,7 +258,7 @@ public:
      * @param[in] event 日志事件
      */
     std::string format(std::shared_ptr<Logger> logger, LogLevel::Level level, LogEvent::ptr event);
-    std::ostream& format(std::ostream& ofs, Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event);
+    std::ostream& format(std::ostream& ofs, std::shared_ptr<Logger> logger, LogLevel::Level level, LogEvent::ptr event);
    
     /**
      * @brief 日志内容项格式化
@@ -311,7 +320,7 @@ public:
     /**
      * @brief 将日志输出目标的配置转成YAML String
      */
-    virtual std::string toYamlString() = 0;
+    //virtual std::string toYamlString() = 0;
 
     /**
      * @brief 更改日志格式器
@@ -327,7 +336,7 @@ public:
 
 protected:
     LogLevel::Level m_level;
-    bool m_hasFormatter = false;            //是否拥有自己的日志器
+    bool m_hasFormatter = false;            //是否拥有自己的日志格式器
     //MutexType m_mutex;                    //mutex
     LogFormatter::ptr m_formatter;          //日志格式器
 };
@@ -336,6 +345,7 @@ protected:
  * 日志输出器
 */    
 class Logger : public std::enable_shared_from_this<Logger>{
+friend class LoggerManager;
 public:
     typedef std::shared_ptr<Logger> ptr;
     //typedef Spinlock MutexType;
@@ -381,7 +391,7 @@ public:
     void setFormatter(const std::string& val);
 
     LogFormatter::ptr getFormatter();
-    std::string toYamlString();
+    //std::string toYamlString();
 
 private:
     std::string m_name;             //日志名称
@@ -399,7 +409,7 @@ class StdOutLogAppender : public LogAppender{
 public:
     typedef std::shared_ptr<StdOutLogAppender> ptr;
     void log(Logger::ptr logger ,LogLevel::Level level, LogEvent::ptr event) override;
-    std::string toYamlString() override;
+    //std::string toYamlString() override;
 private:
 
 };
@@ -412,7 +422,7 @@ public:
     typedef std::shared_ptr<FileLogAppender> ptr;
     FileLogAppender(const std::string& filename);
     void log(std::shared_ptr<Logger> logger, LogLevel::Level level, LogEvent::ptr event) override;
-    std::string toYamlString() override;
+    //std::string toYamlString() override;
 
     /**
      * @brief 重新打开日志文件
@@ -452,7 +462,7 @@ public:
     /**
      * @brief 将所有日志器配置转成YAML String
      */
-    std::string toYamlString();
+    //std::string toYamlString();
 
 private:
     //MutexType m_mutex;

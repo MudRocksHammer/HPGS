@@ -2,13 +2,15 @@ cmake_minimum_required(VERSION 3.10)
 project(HPGS)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
-set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -03 -g -std=c++11 -Wall -Wno-deprecated -Werror -Wno-unused-function")
+set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O3 -g -std=c++11 -Wall -Wno-deprecated -Werror -Wno-unused-function")
 
-set(LIB_SRC HPGS/loc.cc)
+set(LIB_SRC ${PROJECT_SOURCE_DIR}/src/log.cc)
 
 add_library(HPGS SHARED ${LIB_SRC})
 #add_library(HPGS_static static ${LIB_SRC})
 #SET_TARGET_PROPERTIES (HPGS_static PROPERTIES OUTPUT_NAME "HPGS")
+include_directories(${PROJECT_SOURCE_DIR}/include)
+
 
 add_executable(test tests/test.cc)
 add_dependencies(test HPGS)
