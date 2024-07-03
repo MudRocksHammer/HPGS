@@ -5,6 +5,7 @@
 #include <string.h>
 #include <map>
 #include <set>
+#include <type_traits>
 
 namespace HPGS{
 
@@ -238,7 +239,7 @@ LogEvent::LogEvent(Logger::ptr logger, LogLevel::Level level,
 Logger::Logger(const std::string& name) 
         : m_name(name),
         m_level(LogLevel::DEBUG) {
-            m_formatter.reset(new LogFormatter("%d{%Y-%m-%d %H:%M:%S}%T%t%T%N%T%F%T[%p]%T[%c]%T%f:%l%T%m%n"));
+            m_formatter.reset(new LogFormatter("%d{[(%Y-%m-%d %H:%M:%S)]}%T%t%T%N%T%F%T[%p]%T[%c]%T%f:%l%T%m%n"));
 }
 
 void Logger::setFormatter(LogFormatter::ptr val){
@@ -420,6 +421,8 @@ std::ostream& LogFormatter::format(std::ostream& ofs, Logger::ptr logger, LogLev
 }
 
 //%xxx %xxx{xxx} %%
+//%d{%Y-%m-%d %H:%M:%S}%T%t%T%N%T%F%T[%p]%T[%c]%T%f:%l%T%m%n
+//%d{[(%Y-%m-%d %H:%M:%S)]}%T%t%T%N%T%F%T[%p]%T[%c]%T%f:%l%T^^%m^^%n
 void LogFormatter::init(){
     //std format type
     std::vector<std::tuple<std::string, std::string, int>> vec;
@@ -430,22 +433,28 @@ void LogFormatter::init(){
             continue;
         }
 
+        //透明传输
         if((i + 1) < m_pattern.size() && m_pattern[i + 1] == '%'){
             nstr.append(1, '%');
             continue;
         }
 
+        //%的后一位是formatItem，后续进行处理
+
+       
         size_t n = i + 1, fmt_begin = 0;
+        //状态变化只有进入 { 和出 }
         int fmt_status = 0;
 
         std::string str, fmt;
         while(n < m_pattern.size()){
+            //状态0 && (s不为字母 && '{' && '}')
             if(!fmt_status && (!isalpha(m_pattern[n]) && m_pattern[n] != '{'
                     && m_pattern[n] != '}')){
                 str = m_pattern.substr(i + 1, n - i - 1);
                 break;
             }
-           if(fmt_status == 0){
+            if(fmt_status == 0){
                 if(m_pattern[n] == '{'){
                     str = m_pattern.substr(i + 1, n - i -1);
                     fmt_status = 1;     //  解析格式
@@ -468,7 +477,7 @@ void LogFormatter::init(){
                     str = m_pattern.substr(i + 1);
                 }
             }
-        }
+        }   //while (n < m_pattern.size())
 
         if(fmt_status == 0){
             if(!nstr.empty()){
@@ -483,37 +492,34 @@ void LogFormatter::init(){
             m_error = true;
             vec.push_back(std::make_tuple("<Pattern Error>", fmt, 0));
         }
-        // else if(fmt_status == 2){
-        //     if(!nstr.empty()){
-        //         vec.push_back(std::make_tuple(nstr, "", 0));
-        //     }
-        //     vec.push_back(std::make_tuple(str, fmt, 1));
-        //     i = n;
-        // }
-    }
+    } //for size_t i = 0
 
     if(!nstr.empty()){
         vec.push_back(std::make_tuple(nstr, "", 0));
     }
 
-    static std::map<std::string, std::function<FormatItem::ptr(const std::string& str)> > 
-            s_format_items = {
+    for (auto i: vec){
+        std::cout << std::get<0>(i) << "  " << std::get<1>(i) << " " << std::get<2>(i) << std::endl;
+    }
+
+    static std::map<std::string, std::function<FormatItem::ptr(const std::string &str)>>
+        s_format_items = {
 #define XX(str, C)  \
         {#str, [](const std::string& fmt) {return FormatItem::ptr(new C(fmt)); }}
-            XX(m, MessageFormatItem),           //m:消息
-            XX(p, LevelFormatItem),             //p:日志级别
-            XX(r, ElapseFormatItem),            //r:累计毫秒数
-            XX(c, NameFormatItem),              //c：日志名称
-            XX(t, ThreadIdFormatItem),          //t：线程id
-            XX(n, NewLineFormatItem),           //n：换行
-            XX(d, DateTimeFormatItem),          //d: 日期时间
-            XX(f, FileNameFormatItem),          //f：文件名
-            XX(l, LineFormatItem),              //l：行号
-            XX(T, TabFormatItem),               //T：tab
-            XX(F, FibreIdFormatItem),             //F：协程ID
-            XX(N, ThreadNameFormatItem),        //N：线程名称
+            XX(m, MessageFormatItem),    // m:消息
+            XX(p, LevelFormatItem),      // p:日志级别
+            XX(r, ElapseFormatItem),     // r:累计毫秒数
+            XX(c, NameFormatItem),       // c：日志名称
+            XX(t, ThreadIdFormatItem),   // t：线程id
+            XX(n, NewLineFormatItem),    // n：换行
+            XX(d, DateTimeFormatItem),   // d: 日期时间
+            XX(f, FileNameFormatItem),   // f：文件名
+            XX(l, LineFormatItem),       // l：行号
+            XX(T, TabFormatItem),        // T：tab
+            XX(F, FibreIdFormatItem),    // F：协程ID
+            XX(N, ThreadNameFormatItem), // N：线程名称
 #undef XX
-    };
+        };
 
     for(auto& i : vec){
         if(std::get<2>(i) == 0){
@@ -530,7 +536,7 @@ void LogFormatter::init(){
             }
         }
         //std::cout << std::get<0>(i) << "-" << std::get<1>(i) << "-" <<std::get<2>(i) << std::endl;
-    }
+    }//for auto& i : vec
     /**
      * %m -- 消息体
      * %p -- level
@@ -542,6 +548,7 @@ void LogFormatter::init(){
      * %f -- 文件名
      * %l -- 行号
      */
+    std::cout << std::endl;
 }
 
 LoggerManager::LoggerManager(){

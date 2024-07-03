@@ -52,7 +52,6 @@ CMakeFiles/HPGS.dir/src/log.cc.o: ../src/log.cc \
   /usr/include/x86_64-linux-gnu/bits/types/FILE.h \
   /usr/include/x86_64-linux-gnu/bits/types/locale_t.h \
   /usr/include/x86_64-linux-gnu/bits/types/__locale_t.h \
-  /usr/include/x86_64-linux-gnu/bits/wchar2.h \
   /usr/include/c++/11/cstdint \
   /usr/lib/gcc/x86_64-linux-gnu/11/include/stdint.h \
   /usr/include/stdint.h \
@@ -129,11 +128,8 @@ CMakeFiles/HPGS.dir/src/log.cc.o: ../src/log.cc \
   /usr/include/x86_64-linux-gnu/sys/select.h \
   /usr/include/x86_64-linux-gnu/bits/select.h \
   /usr/include/x86_64-linux-gnu/bits/types/sigset_t.h \
-  /usr/include/x86_64-linux-gnu/bits/select2.h \
   /usr/include/alloca.h \
-  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
-  /usr/include/x86_64-linux-gnu/bits/stdlib.h \
   /usr/include/c++/11/bits/std_abs.h \
   /usr/include/c++/11/cstdio \
   /usr/include/stdio.h \
@@ -142,8 +138,6 @@ CMakeFiles/HPGS.dir/src/log.cc.o: ../src/log.cc \
   /usr/include/x86_64-linux-gnu/bits/types/struct_FILE.h \
   /usr/include/x86_64-linux-gnu/bits/types/cookie_io_functions_t.h \
   /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio2.h \
   /usr/include/c++/11/cerrno \
   /usr/include/errno.h \
   /usr/include/x86_64-linux-gnu/bits/errno.h \
@@ -232,8 +226,6 @@ CMakeFiles/HPGS.dir/src/log.cc.o: ../src/log.cc \
   /usr/include/c++/11/bits/std_function.h \
   /usr/include/string.h \
   /usr/include/strings.h \
-  /usr/include/x86_64-linux-gnu/bits/strings_fortified.h \
-  /usr/include/x86_64-linux-gnu/bits/string_fortified.h \
   /usr/include/c++/11/set \
   /usr/include/c++/11/bits/stl_set.h \
   /usr/include/c++/11/bits/stl_multiset.h
@@ -242,6 +234,8 @@ CMakeFiles/HPGS.dir/src/log.cc.o: ../src/log.cc \
 /usr/include/c++/11/bits/stl_multiset.h:
 
 /usr/include/c++/11/bits/stl_set.h:
+
+/usr/include/string.h:
 
 ../include/singleton.h:
 
@@ -263,7 +257,11 @@ CMakeFiles/HPGS.dir/src/log.cc.o: ../src/log.cc \
 
 /usr/include/c++/11/bits/basic_ios.tcc:
 
+/usr/include/c++/11/bits/locale_facets.tcc:
+
 /usr/include/c++/11/bits/streambuf_iterator.h:
+
+/usr/include/c++/11/cwctype:
 
 /usr/include/c++/11/bits/locale_facets.h:
 
@@ -353,27 +351,13 @@ CMakeFiles/HPGS.dir/src/log.cc.o: ../src/log.cc \
 
 /usr/include/c++/11/cerrno:
 
-/usr/include/c++/11/bits/locale_facets.tcc:
-
-/usr/include/x86_64-linux-gnu/bits/stdio2.h:
-
-/usr/include/string.h:
-
-/usr/include/x86_64-linux-gnu/bits/stdio.h:
-
 /usr/include/stdio.h:
 
 /usr/include/c++/11/cstdio:
 
 /usr/include/c++/11/bits/std_abs.h:
 
-/usr/include/c++/11/cwctype:
-
-/usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h:
-
 /usr/include/alloca.h:
-
-/usr/include/x86_64-linux-gnu/bits/select2.h:
 
 /usr/include/c++/11/cctype:
 
@@ -384,10 +368,6 @@ CMakeFiles/HPGS.dir/src/log.cc.o: ../src/log.cc \
 /usr/include/x86_64-linux-gnu/bits/types/__FILE.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/clock_t.h:
-
-/usr/include/x86_64-linux-gnu/bits/wchar2.h:
-
-/usr/include/x86_64-linux-gnu/bits/strings_fortified.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/mbstate_t.h:
 
@@ -430,8 +410,6 @@ CMakeFiles/HPGS.dir/src/log.cc.o: ../src/log.cc \
 /usr/include/x86_64-linux-gnu/sys/cdefs.h:
 
 /usr/include/x86_64-linux-gnu/asm/errno.h:
-
-/usr/include/x86_64-linux-gnu/bits/stdlib.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/struct_timeval.h:
 
@@ -577,8 +555,6 @@ CMakeFiles/HPGS.dir/src/log.cc.o: ../src/log.cc \
 
 /usr/include/c++/11/bits/move.h:
 
-/usr/include/x86_64-linux-gnu/bits/string_fortified.h:
-
 /usr/include/c++/11/bits/stl_tree.h:
 
 /usr/include/c++/11/tuple:
@@ -619,13 +595,13 @@ CMakeFiles/HPGS.dir/src/log.cc.o: ../src/log.cc \
 
 /usr/include/x86_64-linux-gnu/bits/locale.h:
 
-/usr/include/c++/11/iostream:
+/usr/include/x86_64-linux-gnu/bits/endianness.h:
 
-/usr/include/c++/11/backward/binders.h:
+/usr/include/c++/11/iostream:
 
 /usr/include/x86_64-linux-gnu/bits/select.h:
 
-/usr/include/x86_64-linux-gnu/bits/endianness.h:
+/usr/include/c++/11/backward/binders.h:
 
 /usr/include/x86_64-linux-gnu/gnu/stubs.h:
 

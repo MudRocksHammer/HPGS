@@ -3,8 +3,8 @@
  * @brief 日志模块封装
  */
 
-#ifndef _LOG_H
-#define _LOG_H
+#ifndef __LOG_H__
+#define __LOG_H__
 
 #include <string>
 #include <stdint.h>
@@ -31,27 +31,27 @@
 /**
  * @brief 使用流方式将日志级别debug的日志写到logger
  */
-#define HPGS_LOG_DEBUG(logger) HPGS_LOG_LEVEL(logger, HPGS::LogLevel::DEBUG);
+#define HPGS_LOG_DEBUG(logger) HPGS_LOG_LEVEL(logger, HPGS::LogLevel::DEBUG)
 
 /**
  * @brief 使用流方式将日志级别info的日志写到logger
  */
-#define HPGS_LOG_INFO(logger) HPGS_LOG_LEVEL(logger, HPGS::LogLevel::INFO);
+#define HPGS_LOG_INFO(logger) HPGS_LOG_LEVEL(logger, HPGS::LogLevel::INFO)
 
 /**
  * @brief 使用流方式将日志级别warning的日志写到logger
  */
-#define HPGS_LOG_WARNING(logger) HPGS_LOG_LEVEL(logger, HPGS::LogLevel::WARNING);
+#define HPGS_LOG_WARNING(logger) HPGS_LOG_LEVEL(logger, HPGS::LogLevel::WARNING)
 
 /**
  * @brief 使用流方式将日志级别error的日志写到logger
  */
-#define HPGS_LOG_ERROR(logger) HPGS_LOG_LEVEL(logger, HPGS::LogLevel::ERROR);
+#define HPGS_LOG_ERROR(logger) HPGS_LOG_LEVEL(logger, HPGS::LogLevel::ERROR)
 
 /**
  * @brief 使用流方式将日志级别fatal的日志写到logger
  */
-#define HPGS_LOG_FATAL(logger) HPGS_LOG_LEVEL(logger, HPGS::LogLevel::FATAL);
+#define HPGS_LOG_FATAL(logger) HPGS_LOG_LEVEL(logger, HPGS::LogLevel::FATAL)
 
 /**
  * @brief 使用格式化方式将日志级别level的日志写入到logger
