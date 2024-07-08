@@ -16,5 +16,9 @@ add_executable(test tests/test.cc)
 add_dependencies(test HPGS)
 target_link_libraries(test HPGS)
 
+add_executable(test_config tests/test_config.cc)
+add_dependencies(test_config HPGS)
+target_link_libraries(test_config HPGS)
+
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
