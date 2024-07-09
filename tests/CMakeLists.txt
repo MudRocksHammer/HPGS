@@ -1,0 +1,2 @@
+add_subdirectory(log_test)
+add_subdirectory(config_test)
