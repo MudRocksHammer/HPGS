@@ -68,6 +68,16 @@ CMAKE_BINARY_DIR = /home/xiaorenbo/share/HPGS/build
 #=============================================================================
 # Targets provided globally by CMake.
 
+# Special rule for the target test
+test:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running tests..."
+	/usr/bin/ctest --force-new-ctest-process $(ARGS)
+.PHONY : test
+
+# Special rule for the target test
+test/fast: test
+.PHONY : test/fast
+
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake cache editor..."
@@ -133,17 +143,17 @@ HPGS/fast:
 .PHONY : HPGS/fast
 
 #=============================================================================
-# Target rules for targets named test
+# Target rules for targets named test_log
 
 # Build rule for target.
-test: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test
-.PHONY : test
+test_log: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test_log
+.PHONY : test_log
 
 # fast build rule for target.
-test/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test.dir/build.make CMakeFiles/test.dir/build
-.PHONY : test/fast
+test_log/fast:
+	$(MAKE) $(MAKESILENT) -f tests/log_test/CMakeFiles/test_log.dir/build.make tests/log_test/CMakeFiles/test_log.dir/build
+.PHONY : test_log/fast
 
 #=============================================================================
 # Target rules for targets named test_config
@@ -155,8 +165,56 @@ test_config: cmake_check_build_system
 
 # fast build rule for target.
 test_config/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_config.dir/build.make CMakeFiles/test_config.dir/build
+	$(MAKE) $(MAKESILENT) -f tests/config_test/CMakeFiles/test_config.dir/build.make tests/config_test/CMakeFiles/test_config.dir/build
 .PHONY : test_config/fast
+
+src/config.o: src/config.cc.o
+.PHONY : src/config.o
+
+# target to build an object file
+src/config.cc.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/HPGS.dir/build.make CMakeFiles/HPGS.dir/src/config.cc.o
+.PHONY : src/config.cc.o
+
+src/config.i: src/config.cc.i
+.PHONY : src/config.i
+
+# target to preprocess a source file
+src/config.cc.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/HPGS.dir/build.make CMakeFiles/HPGS.dir/src/config.cc.i
+.PHONY : src/config.cc.i
+
+src/config.s: src/config.cc.s
+.PHONY : src/config.s
+
+# target to generate assembly for a file
+src/config.cc.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/HPGS.dir/build.make CMakeFiles/HPGS.dir/src/config.cc.s
+.PHONY : src/config.cc.s
+
+src/env.o: src/env.cc.o
+.PHONY : src/env.o
+
+# target to build an object file
+src/env.cc.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/HPGS.dir/build.make CMakeFiles/HPGS.dir/src/env.cc.o
+.PHONY : src/env.cc.o
+
+src/env.i: src/env.cc.i
+.PHONY : src/env.i
+
+# target to preprocess a source file
+src/env.cc.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/HPGS.dir/build.make CMakeFiles/HPGS.dir/src/env.cc.i
+.PHONY : src/env.cc.i
+
+src/env.s: src/env.cc.s
+.PHONY : src/env.s
+
+# target to generate assembly for a file
+src/env.cc.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/HPGS.dir/build.make CMakeFiles/HPGS.dir/src/env.cc.s
+.PHONY : src/env.cc.s
 
 src/log.o: src/log.cc.o
 .PHONY : src/log.o
@@ -182,54 +240,6 @@ src/log.cc.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/HPGS.dir/build.make CMakeFiles/HPGS.dir/src/log.cc.s
 .PHONY : src/log.cc.s
 
-tests/test.o: tests/test.cc.o
-.PHONY : tests/test.o
-
-# target to build an object file
-tests/test.cc.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test.dir/build.make CMakeFiles/test.dir/tests/test.cc.o
-.PHONY : tests/test.cc.o
-
-tests/test.i: tests/test.cc.i
-.PHONY : tests/test.i
-
-# target to preprocess a source file
-tests/test.cc.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test.dir/build.make CMakeFiles/test.dir/tests/test.cc.i
-.PHONY : tests/test.cc.i
-
-tests/test.s: tests/test.cc.s
-.PHONY : tests/test.s
-
-# target to generate assembly for a file
-tests/test.cc.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test.dir/build.make CMakeFiles/test.dir/tests/test.cc.s
-.PHONY : tests/test.cc.s
-
-tests/test_config.o: tests/test_config.cc.o
-.PHONY : tests/test_config.o
-
-# target to build an object file
-tests/test_config.cc.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_config.dir/build.make CMakeFiles/test_config.dir/tests/test_config.cc.o
-.PHONY : tests/test_config.cc.o
-
-tests/test_config.i: tests/test_config.cc.i
-.PHONY : tests/test_config.i
-
-# target to preprocess a source file
-tests/test_config.cc.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_config.dir/build.make CMakeFiles/test_config.dir/tests/test_config.cc.i
-.PHONY : tests/test_config.cc.i
-
-tests/test_config.s: tests/test_config.cc.s
-.PHONY : tests/test_config.s
-
-# target to generate assembly for a file
-tests/test_config.cc.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_config.dir/build.make CMakeFiles/test_config.dir/tests/test_config.cc.s
-.PHONY : tests/test_config.cc.s
-
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -238,18 +248,19 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... HPGS"
 	@echo "... test"
+	@echo "... HPGS"
 	@echo "... test_config"
+	@echo "... test_log"
+	@echo "... src/config.o"
+	@echo "... src/config.i"
+	@echo "... src/config.s"
+	@echo "... src/env.o"
+	@echo "... src/env.i"
+	@echo "... src/env.s"
 	@echo "... src/log.o"
 	@echo "... src/log.i"
 	@echo "... src/log.s"
-	@echo "... tests/test.o"
-	@echo "... tests/test.i"
-	@echo "... tests/test.s"
-	@echo "... tests/test_config.o"
-	@echo "... tests/test_config.i"
-	@echo "... tests/test_config.s"
 .PHONY : help
 
 

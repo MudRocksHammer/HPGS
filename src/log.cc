@@ -51,6 +51,10 @@ LogLevel::Level LogLevel::FromString(const std::string& str){
 
 LogEventWrap::LogEventWrap(LogEvent::ptr e) : m_event(e) { }
 
+LogEventWrap::~LogEventWrap(){
+    m_event->getLogger()->log(m_event->getLevel(), m_event);
+}
+
 void LogEvent::format(const char* fmt, ...){
     va_list al;
     va_start(al, fmt);
@@ -117,7 +121,7 @@ class NameFormatItem : public LogFormatter::FormatItem{
 public:
     NameFormatItem(const std::string& std = "") {}
     void format(std::ostream& os, Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) override {
-        os << event->getElapse();
+        os << logger->getName();
     }
 };
 
@@ -214,7 +218,7 @@ public:
         os << "\t";
     }
 
-};    
+};
 
 LogEvent::LogEvent(Logger::ptr logger, LogLevel::Level level,
                     const char* file, int32_t line, uint32_t elapse,
@@ -499,7 +503,7 @@ void LogFormatter::init(){
     }
 
     for (auto i: vec){
-        std::cout << std::get<0>(i) << "  " << std::get<1>(i) << " " << std::get<2>(i) << std::endl;
+        //std::cout << std::get<0>(i) << "  " << std::get<1>(i) << " " << std::get<2>(i) << std::endl;
     }
 
     static std::map<std::string, std::function<FormatItem::ptr(const std::string &str)>>
@@ -537,6 +541,7 @@ void LogFormatter::init(){
         }
         //std::cout << std::get<0>(i) << "-" << std::get<1>(i) << "-" <<std::get<2>(i) << std::endl;
     }//for auto& i : vec
+
     /**
      * %m -- 消息体
      * %p -- level
@@ -548,7 +553,7 @@ void LogFormatter::init(){
      * %f -- 文件名
      * %l -- 行号
      */
-    std::cout << std::endl;
+    //std::cout << std::endl;
 }
 
 LoggerManager::LoggerManager(){

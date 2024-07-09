@@ -33,7 +33,7 @@ public:
      */
     ConfigVarBase(const std::string& name, const std::string& description = "")
     :m_name(name),
-    m_description(description){  
+    m_description(description){
         std::transform(m_name.begin(), m_name.end(), m_name.begin(), ::tolower);
     }
     virtual ~ConfigVarBase() { }
@@ -84,7 +84,7 @@ public:
         for(size_t i = 0; i < node.size(); i++){
             ss.str("");
             ss << node[i];
-            vec.push_back(LexicalCast<std::string, T>()(ss.std()));
+            vec.push_back(LexicalCast<std::string, T>()(ss.str()));
         }
         return vec;
     }
@@ -120,7 +120,7 @@ public:
         for(size_t i = 0; i < node.size(); i++){
             ss.str("");
             ss << node[i];
-            vec.push_back(LexicalCast<str::string, T>()(ss.str()));
+            vec.push_back(LexicalCast<std::string, T>()(ss.str()));
         }
         return vec;
     }
@@ -156,7 +156,7 @@ public:
         for(size_t i = 0; i < node.size(); i++){
             ss.str("");
             ss << node[i];
-            vec.insert(LexicalCast<str::string, T>()(ss.str()));
+            vec.insert(LexicalCast<std::string, T>()(ss.str()));
         }
         return vec;
     }
@@ -222,7 +222,8 @@ template<class T, class FromStr = LexicalCast<std::string, T>
 class ConfigVar : public ConfigVarBase{
 public:
     //typedef RWMutex RWMutexType;
-    typedef std::shared_ptr<ConfigVar> ptr;
+    //typedef std::shared_ptr<ConfigVar> ptr;
+    using ptr = std::shared_ptr<ConfigVar>;
     typedef std::function<void (const T& old_value, const T& new_value)> on_change_cb;
 
     /**
@@ -257,6 +258,7 @@ public:
         try{
             ////m_val = boost::lexical_cast<T>(val);
             setValue(FromStr()(val));
+            return true;
         }
         catch(std::exception& e){
             HPGS_LOG_ERROR(HPGS_LOG_ROOT()) << "ConfigVar::fromString exception"
@@ -286,7 +288,10 @@ public:
         m_val = v; 
     }
 
-    std::string getTypeName() const override { return TypeToName<T>(); }
+    std::string getTypeName() const override { 
+        //return TypeToName<T>();
+        return typeid(T).name();
+    }
 
     /**
      * @brief 添加变化回调函数
@@ -350,12 +355,12 @@ public:
         if(it != GetDatas().end()){
             auto tmp = std::dynamic_pointer_cast<ConfigVar<T> >(it->second);
             if(tmp){
-                HPGS_LOG_INFO(SYLAR_LOG_ROOT()) << "Lookup name = " << name <<" exists";
+                HPGS_LOG_INFO(HPGS_LOG_ROOT()) << "Lookup name = " << name <<" exists";
                 return tmp;
             }
             else{
                 HPGS_LOG_ERROR(HPGS_LOG_ROOT()) << "Lookup name = " << name << " exists, but type "
-                << TypeToName<T>() << " not equals real_type = " << it->second->getTypeName()
+                << /*TypeToName<T>()*/typeid(T).name() << " not equals real_type = " << it->second->getTypeName()
                 << " " << it->second->toString();
                 return nullptr;
             }
@@ -366,8 +371,10 @@ public:
             throw std::invalid_argument(name);
         }
 
-        typename ConfigVar<T>::ptr v(new ConfigVar<T>(name, default_value, description));
-        s_datas[name] = v;
+        //typename 告诉编译器ConfigVar<T>::ptr 是类型别名而不是静态成员变量
+        //typename ConfigVar<T>::ptr v(new ConfigVar<T>(name, default_value, description));
+        typename ConfigVar<T>::ptr v = std::make_shared<ConfigVar<T>>(name, default_value, description);
+        GetDatas()[name] = v;
 
         return v;
     }

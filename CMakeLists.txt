@@ -4,21 +4,19 @@ project(HPGS)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O0 -g -std=c++11 -Wall -Wno-deprecated -Werror -Wno-unused-function")
 
-set(LIB_SRC ${PROJECT_SOURCE_DIR}/src/log.cc)
+find_package(yaml-cpp REQUIRED)
 
-add_library(HPGS SHARED ${LIB_SRC})
+file(GLOB DIR_SRC "src/*.cc")
+
+add_library(HPGS SHARED ${DIR_SRC})
 #add_library(HPGS_static static ${LIB_SRC})
 #SET_TARGET_PROPERTIES (HPGS_static PROPERTIES OUTPUT_NAME "HPGS")
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
+target_link_libraries(HPGS PRIVATE yaml-cpp::yaml-cpp)
 
-add_executable(test tests/test.cc)
-add_dependencies(test HPGS)
-target_link_libraries(test HPGS)
-
-add_executable(test_config tests/test_config.cc)
-add_dependencies(test_config HPGS)
-target_link_libraries(test_config HPGS)
+enable_testing()
+add_subdirectory(tests)
 
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)

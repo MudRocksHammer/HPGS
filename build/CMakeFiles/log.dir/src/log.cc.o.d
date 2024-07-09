@@ -1,4 +1,4 @@
-CMakeFiles/HPGS.dir/src/log.cc.o: /home/xiaorenbo/share/HPGS/src/log.cc \
+CMakeFiles/log.dir/src/log.cc.o: /home/xiaorenbo/share/HPGS/src/log.cc \
  /usr/include/stdc-predef.h /home/xiaorenbo/share/HPGS/include/log.h \
  /usr/include/c++/11/string \
  /usr/include/x86_64-linux-gnu/c++/11/bits/c++config.h \

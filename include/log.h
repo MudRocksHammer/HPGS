@@ -107,7 +107,7 @@
  * @brief 通过logger和event实例写日志信息
  */
 #define HPGS_WRITE_LOG(logger, event, message) \
-        if(logger->getLevel() <= event->getLevel()) {\
+        if(logger->getLevel() <= event->getLevel()) { \
             event->setContent(message); \
             logger->log(event->getLevel(), event);  \
         }
@@ -175,7 +175,7 @@ public:
     uint32_t getFibreId() const { return m_fibreId; }
     uint64_t getTime() const { return m_time; }
     const std::string& getThreadNmae() const { return m_threadName; }
-    const std::string& getContent() const { return m_content; }
+    std::string getContent() const { return m_ss.str(); }
     std::shared_ptr<Logger> getLogger() const { return m_logger; }
     LogLevel::Level getLevel() const { return m_level; }
     std::stringstream& getSS() { return m_ss; }
