@@ -398,6 +398,7 @@ public:
 
     static void LoadFromConfDir(const std::string& path, bool force = false);
 
+    //不清楚类型时找到基类指针
     static ConfigVarBase::ptr LookupBase(const std::string& name);
 
     /**
