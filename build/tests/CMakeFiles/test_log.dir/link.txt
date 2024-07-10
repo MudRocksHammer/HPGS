@@ -1,1 +1,0 @@
-/usr/bin/c++  -rdynamic -O0 -g -std=c++11 -Wall -Wno-deprecated -Werror -Wno-unused-function CMakeFiles/test_log.dir/test_log.cc.o -o test_log  -Wl,-rpath,/home/xiaorenbo/share/HPGS/lib ../../lib/liblog.so /usr/local/lib/libgtest.a -lpthread 
