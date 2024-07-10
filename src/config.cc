@@ -16,6 +16,7 @@ ConfigVarBase::ptr Config::LookupBase(const std::string& name){
     return it == GetDatas().end() ? nullptr : it->second;
 }
 
+//把node中的所有项添加到output list中
 static void ListAllMember(const std::string prefix, const YAML::Node& node,
 std::list<std::pair<std::string, const YAML::Node> >& output){
     if(prefix.find_first_not_of("abcdefghijklmnopqrstuvwxyz._0123456789") != std::string::npos){
@@ -86,6 +87,7 @@ void Config::LoadFromConfDir(const std::string& path, bool force){
     }
 }
 
+//对ConfigMap中所有配置变量使用cb函数
 void Config::Visit(std::function<void(ConfigVarBase::ptr)> cb){
     //RWMutexType::ReadLock lock(GetMutex());
     ConfigVarMap& m = GetDatas();
