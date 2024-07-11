@@ -264,7 +264,7 @@ public:
     static std::string TrimRight(const std::string& str, const std::string& delimit = " \t\r\n");
 
     static std::string WStringToString(const std::wstring& ws);
-    static std::string StringToWString(const std::string& s);
+    static std::wstring StringToWString(const std::string& s);
 };
 
 std::string GetHostName();
