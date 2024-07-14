@@ -34,6 +34,13 @@ Scheduler::Scheduler(size_t threads, bool use_caller, const std::string& name) :
     m_threadCount = threads;
 }
 
+Scheduler::~Scheduler(){
+    HPGS_ASSERT(m_stopping);
+    if(GetThis() == this){
+        t_scheduler = nullptr;
+    }
+}
+
 Scheduler* Scheduler::GetThis(){
     return t_scheduler;
 }
@@ -212,6 +219,11 @@ void Scheduler::run(){
 
 void Scheduler::tickle(){
     HPGS_LOG_INFO(g_logger) << "tickle";
+}
+
+bool Scheduler::stopping() {
+    MutexType::Lock lock(m_mutex);
+    return m_autoStop && m_stopping && m_fibres.empty() && m_activeThreadCount == 0;
 }
 
 void Scheduler::idle(){
