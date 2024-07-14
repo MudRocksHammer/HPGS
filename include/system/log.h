@@ -17,22 +17,25 @@
 #include <stdarg.h>
 #include <map>
 #include "singleton.h"
+#include "util.h"
+#include "thread.h"
 
 /**
  * @brief 使用流方式将日志级别level的日志写入logger
  * @details 构造一个LogEventWrap对象，包裹包含日志器和日志事件，再对象析构时调用日志器写日志事件
  */
-/* #define HPGS_LOG_LEVEL(logger, level) \
-//     if(logger->getLevel() <= level) \
-//         HPGS::LogEventWrap(HPGS::LogEvent::ptr(new HPGS::LogEvent(logger, level, \
-//                                 __FILE__, __LINE__, 0, HPGS::GetThreadId(), \
-//                                 HPGS::GetfibreId(), time(0), HPGS::Thread::GetName()))).getSS()
-*/
-#define HPGS_LOG_LEVEL(logger, level) \
+ #define HPGS_LOG_LEVEL(logger, level) \
+    if(logger->getLevel() <= level) \
+        HPGS::LogEventWrap(HPGS::LogEvent::ptr(new HPGS::LogEvent(logger, level, \
+                                __FILE__, __LINE__, 0, HPGS::GetThreadId(), \
+                                HPGS::GetFibreId(), time(0), HPGS::Thread::GetName()))).getSS()
+
+/*#define HPGS_LOG_LEVEL(logger, level) \
     if(logger->getLevel() <= level) \
         HPGS::LogEventWrap(HPGS::LogEvent::ptr(new HPGS::LogEvent(logger, level, \
                                 __FILE__, __LINE__, 0, 0, \
                                 1, time(0), "thread1"))).getSS()
+*/
 
 /**
  * @brief 使用流方式将日志级别debug的日志写到logger

@@ -3,11 +3,11 @@ logs:
       level: info
       appenders:
           - type: FileLogAppender
-            file: /home/xiaorenbo/share/HPGS/build/rootlog
+            file: /apps/logs/root.txt
           - type: StdoutLogAppender
     - name: system
       level: info
       appenders:
           - type: FileLogAppender
-            file: /home/xiaorenbo/share/HPGS/build/systemlog
+            file: /apps/logs/system.txt
           - type: StdoutLogAppender
