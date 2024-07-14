@@ -1,2 +1,4 @@
-add_subdirectory(log_test)
-add_subdirectory(config_test)
+#add_subdirectory(log_test)
+#add_subdirectory(config_test)
+add_subdirectory(fibre_test)
+add_subdirectory(thread_test)
