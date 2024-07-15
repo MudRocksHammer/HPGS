@@ -13,6 +13,7 @@ static Logger::ptr g_logger = HPGS_LOG_NAME("system");
 static std::atomic<uint64_t> s_fibre_id{0};
 static std::atomic<uint64_t> s_fibre_count{0};
 
+//线程当前执行的协程
 static thread_local Fibre* t_fibre = nullptr;
 
 //该线程的主协程
@@ -74,6 +75,7 @@ Fibre::Fibre(std::function<void()> cb, size_t stacksize, bool use_caller)
     }
     else{
         makecontext(&m_ctx, &Fibre::CallerMainFunc, 0);
+        SetThis(this);
     }
 
     HPGS_LOG_DEBUG(g_logger) << "Fibre::Fibre id = " << m_id;
@@ -117,6 +119,16 @@ void Fibre::reset(std::function<void()> cb){
     m_state = INIT;
 }
 
+void Fibre::createMainFibre(){
+    if(t_threadFibre){
+        return;
+    }
+    
+    Fibre::ptr main_fibre(new Fibre);
+    HPGS_ASSERT(t_fibre == main_fibre.get());
+    t_threadFibre = main_fibre;
+}
+
 void Fibre::call(){
     SetThis(this);
     m_state = EXEC;
@@ -136,14 +148,21 @@ void Fibre::swapIn(){
     SetThis(this);
     HPGS_ASSERT(m_state != EXEC);
     m_state = EXEC;
-    if(swapcontext(&Scheduler::GetMainFibre()->m_ctx, &m_ctx)){
+    // if(swapcontext(&Scheduler::GetMainFibre()->m_ctx, &m_ctx)){
+    //     HPGS_ASSERT2(false, "swapcontext");
+    // }
+    
+    if(swapcontext(&t_threadFibre->m_ctx, &m_ctx)){
         HPGS_ASSERT2(false, "swapcontext");
     }
 }
 
 void Fibre::swapOut(){
     SetThis(Scheduler::GetMainFibre());
-    if(swapcontext(&m_ctx, &Scheduler::GetMainFibre()->m_ctx)){
+    // if(swapcontext(&m_ctx, &Scheduler::GetMainFibre()->m_ctx)){
+    //     HPGS_ASSERT2(false, "swapcontext");
+    // }
+    if(swapcontext(&m_ctx, &t_threadFibre->m_ctx)){
         HPGS_ASSERT2(false, "swapcontext");
     }
 }
@@ -173,7 +192,8 @@ void Fibre::YieldToReady(){
 void Fibre::YieldToHold(){
     Fibre::ptr cur = GetThis();
     HPGS_ASSERT(cur->m_state == EXEC);
-    cur->swapOut();    
+    cur->m_state = HOLD;
+    cur->swapOut();
 }
 
 uint64_t Fibre::TotalFibres(){
@@ -236,6 +256,7 @@ void Fibre::CallerMainFunc(){
     auto raw_ptr = cur.get();
     cur.reset();
     raw_ptr->back();
+
     HPGS_ASSERT2(false, "nerver reach fibre_id = " + std::to_string(raw_ptr->getId()));
 }
 
