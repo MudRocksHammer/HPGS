@@ -6,8 +6,11 @@
 #include <map>
 #include <set>
 #include <type_traits>
+#include "mutex.h"
 
 namespace HPGS{
+
+Mutex s_log_mutex;
 
 const char* LogLevel::ToString(LogLevel::Level level){
     switch(level){
@@ -52,6 +55,7 @@ LogLevel::Level LogLevel::FromString(const std::string& str){
 LogEventWrap::LogEventWrap(LogEvent::ptr e) : m_event(e) { }
 
 LogEventWrap::~LogEventWrap(){
+    Mutex::Lock lock(s_log_mutex);
     m_event->getLogger()->log(m_event->getLevel(), m_event);
 }
 
