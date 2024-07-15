@@ -199,7 +199,7 @@ void delete_array(T* v){
 template<class T>
 class SharedArray{
 public:
-    explicit SharedArray(const uint64_t& size = 0, T* p = 0) 
+    explicit SharedArray(const uint64_t& size = 0, T* p = nullptr) 
     : m_size(size), m_ptr(p, delete_array<T>){
     }
 
@@ -240,7 +240,8 @@ public:
     }
 
     operator bool() const {
-        return !!m_ptr;
+        //return !!m_ptr;
+        return static_cast<bool>(m_ptr);
     }
 
     uint64_t size() const {

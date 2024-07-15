@@ -30,7 +30,7 @@
 #define HPGS_ASSERT2(x, w) \
         if(HPGS_UNLIKELY(!(x))) { \
             HPGS_LOG_ERROR(HPGS_LOG_ROOT()) << "ASSERTION: " #x \
-            << "\n" << w \
+            << "\n" << #w \
             << "\nbacktrace: \n" \
             << HPGS::BacktraceToString(100, 2, "  "); \
         assert(x); \
