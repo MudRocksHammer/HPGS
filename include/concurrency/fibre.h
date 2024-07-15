@@ -84,7 +84,15 @@ public:
      */
     static void SetThis(Fibre* f);
 
+    /**
+     * @brief 获取当前执行的协程
+     */
     static Fibre::ptr GetThis();
+
+        /**
+     * @brief 创建主协程
+     */
+    static void createMainFibre();
 
     /**
      * @brief 当前协程放弃cpu切换到后台并设置为READY状态
@@ -112,6 +120,9 @@ public:
      */
     static void CallerMainFunc();
 
+    /**
+     * @brief 获取当前协程的Id
+     */
     static uint64_t GetFibreId();
 
     void setState(State state){ m_state = state; }
