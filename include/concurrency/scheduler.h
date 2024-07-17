@@ -18,7 +18,7 @@ namespace HPGS{
 
 /**
  * @brief 协程调度器
- * @details 封装的是N-M的协程调度器，内部有一个线程池，支持线程在线程池里切换
+ * @details 封装的是N-M的协程调度器，内部有一个线程池，支持协程在线程池里切换
  */
 class Scheduler {
 public:
@@ -59,7 +59,7 @@ public:
     void stop();
 
     /**
-     * @brief 协程调度
+     * @brief 添加任务到任务队列，接受协程或函数
      * @param[in] fc 协程或函数
      * @param[in] thread 协程执行的线程id，-1表示任意线程
      */
@@ -77,7 +77,7 @@ public:
     }
 
     /**
-     * @brief 批量协程调度
+     * @brief 批量添加协程，接受协程或函数的iterator
      * @param[in] begin 协程数组的开始
      * @param[in] end 协程数组的结束
      */
@@ -97,6 +97,7 @@ public:
     }
 
     void switchTo(int thread = -1);
+    //输出调度器的所有信息
     std::ostream& dump(std::ostream& os);
 
 protected:
@@ -129,7 +130,7 @@ protected:
 
 private:
     /**
-     * @brief 协程调度启动
+     * @brief 插入任务，支持一个线程号参数指定执行线程
      */
     template<class FibreOrCb>
     bool scheduleNoLock(FibreOrCb fc, int thread){
@@ -206,7 +207,7 @@ private:
     MutexType m_mutex;
     //线程池
     std::vector<Thread::ptr> m_threads;
-    //执行的协程队列
+    //执行的协程队列，可以是function或者协程，thread用于绑定执行的线程
     std::list<FibreAndThread> m_fibres;
     //use_caller 为true时有效，调度协程
     Fibre::ptr m_rootFibre;
@@ -214,7 +215,7 @@ private:
     std::string m_name;
 
 protected:
-    //线程写的线程id数组
+    //线程id数组
     std::vector<int> m_threadIds;
     //线程数量
     size_t m_threadCount = 0;

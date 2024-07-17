@@ -3,6 +3,10 @@
 #define __HPGS_IOMANAGER_H__
 
 
+/**
+ * @brief IO协程调度器通过使用一对管道fd来tickle调度协程，当调度器空闲时，idle协程通过epoll_wait阻塞在管道的描述符上，等管道的可读事件发生。
+ * 添加新任务时，tickle管道，idle退出，调度器执行调度。
+ */
 #include "scheduler.h"
 #include "timer.h"
 

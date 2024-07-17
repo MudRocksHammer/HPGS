@@ -5,6 +5,7 @@
 #include "scheduler.h"
 #include <atomic>
 
+#define USE_SCHEDULER 1
 
 namespace HPGS{
 
@@ -16,7 +17,7 @@ static std::atomic<uint64_t> s_fibre_count{0};
 //线程当前执行的协程
 static thread_local Fibre* t_fibre = nullptr;
 
-//该线程的主协程
+//该线程的主协程,使用调度器的话这里没有用，主协程在调度器里
 static thread_local Fibre::ptr t_threadFibre = nullptr;
 
 static ConfigVar<uint32_t>::ptr g_fibre_stack_size = 
@@ -42,6 +43,7 @@ uint64_t Fibre::GetFibreId(){
     return 0;
 }
 
+//默认协程构造函数做线程的任务，不需要分配协程栈
 Fibre::Fibre(){
     m_state = EXEC;
     SetThis(this);
@@ -75,7 +77,7 @@ Fibre::Fibre(std::function<void()> cb, size_t stacksize, bool use_caller)
     }
     else{
         makecontext(&m_ctx, &Fibre::CallerMainFunc, 0);
-        SetThis(this);
+        //SetThis(this);
     }
 
     HPGS_LOG_DEBUG(g_logger) << "Fibre::Fibre id = " << m_id;
@@ -148,23 +150,23 @@ void Fibre::swapIn(){
     SetThis(this);
     HPGS_ASSERT(m_state != EXEC);
     m_state = EXEC;
-    // if(swapcontext(&Scheduler::GetMainFibre()->m_ctx, &m_ctx)){
-    //     HPGS_ASSERT2(false, "swapcontext");
-    // }
-    
-    if(swapcontext(&t_threadFibre->m_ctx, &m_ctx)){
+    if(swapcontext(&Scheduler::GetMainFibre()->m_ctx, &m_ctx)){
         HPGS_ASSERT2(false, "swapcontext");
     }
+    
+    // if(swapcontext(&t_threadFibre->m_ctx, &m_ctx)){
+    //     HPGS_ASSERT2(false, "swapcontext");
+    // }
 }
 
 void Fibre::swapOut(){
     SetThis(Scheduler::GetMainFibre());
-    // if(swapcontext(&m_ctx, &Scheduler::GetMainFibre()->m_ctx)){
-    //     HPGS_ASSERT2(false, "swapcontext");
-    // }
-    if(swapcontext(&m_ctx, &t_threadFibre->m_ctx)){
+    if(swapcontext(&m_ctx, &Scheduler::GetMainFibre()->m_ctx)){
         HPGS_ASSERT2(false, "swapcontext");
     }
+    // if(swapcontext(&m_ctx, &t_threadFibre->m_ctx)){
+    //     HPGS_ASSERT2(false, "swapcontext");
+    // }
 }
 
 void Fibre::SetThis(Fibre* f){
