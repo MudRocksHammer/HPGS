@@ -72,7 +72,8 @@ void test_fibre(){
     //在线程里面手动调度协程
     HPGS_LOG_INFO(g_logger) << "main begin -1";
     {
-        HPGS::Fibre::GetThis();
+        auto main = HPGS::Fibre::GetThis();
+        main.reset(new HPGS::Fibre(std::bind(&fibre_fun, "waht")));
         HPGS_LOG_INFO(g_logger) << "main begin";
         //创建一个fibre开始执行
         HPGS::Fibre::ptr fibre(new HPGS::Fibre(std::bind(fibre_fun, " cool")));
@@ -90,12 +91,12 @@ TEST(test_fibre, fibre1){
     HPGS::Thread::SetName("main");
 
     std::vector<HPGS::Thread::ptr> threads;
-    // for(int i = 0; i < 1; i++){
-    //     threads.push_back(HPGS::Thread::ptr(new HPGS::Thread(&test_fibre, "name_" + std::to_string(i))));
-    // }
-    for(int i = 0; i < 3; i++){
-        threads.push_back(HPGS::Thread::ptr(new HPGS::Thread(&th_fun, "name_" + std::to_string(i))));
+    for(int i = 0; i < 1; i++){
+        threads.push_back(HPGS::Thread::ptr(new HPGS::Thread(&test_fibre, "name_" + std::to_string(i))));
     }
+    // for(int i = 0; i < 3; i++){
+    //     threads.push_back(HPGS::Thread::ptr(new HPGS::Thread(&th_fun, "name_" + std::to_string(i))));
+    // }
     for(auto i : threads){
         i->join();
     }
