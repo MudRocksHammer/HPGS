@@ -147,7 +147,7 @@ protected:
 
 private:
     /**
-     * #brief 监测服务器时间是否被调后了
+     * @brief 检测服务器时间是否被调后了
      */
     bool detectClockRollover(uint64_t now_ms);
 

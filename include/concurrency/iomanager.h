@@ -6,6 +6,8 @@
 /**
  * @brief IO协程调度器通过使用一对管道fd来tickle调度协程，当调度器空闲时，idle协程通过epoll_wait阻塞在管道的描述符上，等管道的可读事件发生。
  * 添加新任务时，tickle管道，idle退出，调度器执行调度。
+ * 对于IO协程调度来说，每次调度都包含一个三元组信息，分别是描述符，事件类型(可读或可写)，回调函数，调度器记录全部需要调度的三元组信息
+ * 其中描述符和事件类型用于epoll_wait，回调函数用于协程调度。
  */
 #include "scheduler.h"
 #include "timer.h"
@@ -33,11 +35,14 @@ public:
 private:
     /**
      * @brief Socket事件上下文类 
+     * @details 每个socket fd都对应一个FdContext，包括fd的值，fd上的事件，以及fd的读写事件上下文
      */
     struct FdContext {
         typedef Mutex MutexType;
         /**
          * @brief 事件上下文类
+         * @details fd的每个事件都有一个事件上下文，保存这个事件的回调函数以及执行回调函数的调度器，
+         *          fd事件简化只预留读事件和写事件，所有事件都被归为这两类事件
          */
         struct EventContext {
             //事件执行调度器
@@ -91,8 +96,7 @@ public:
     ~IOManager();
 
     /**
-     * @brief 添加事件
-     * @param[in] fd socket fd
+     * @brief 给fd的fdcontext添加epoll event，可以添加callback
      * @param[in] event 事件类型
      * @param[in] cb 事件回调函数
      * @return 添加成功返回0，失败返回-1 

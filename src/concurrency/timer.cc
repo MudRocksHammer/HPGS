@@ -143,12 +143,15 @@ void TimerManager::listExpiredCb(std::vector<std::function<void()> >& cbs){
         return;
     }
     bool rollover = detectClockRollover(now_ms);
+    //系统没有时间回调，最近的任务时间还未到，return
     if(!rollover && ((*m_timers.begin())->m_next > now_ms)){
         return;
     }
 
     Timer::ptr now_timer(new Timer(now_ms));
+    //系统时间回调了，全部执行
     auto it = rollover ? m_timers.end() : m_timers.lower_bound(now_timer);
+    //it = lowerbound已经找到next=now的任务了，需要检查有没有同时间执行的其他任务
     while(it != m_timers.end() && (*it)->m_next == now_ms){
         it++;
     }
@@ -183,6 +186,7 @@ void TimerManager::addTimer(Timer::ptr val, RWMutexType::WriteLock& lock){
 
 bool TimerManager::detectClockRollover(uint64_t now_ms){
     bool rollover = false;
+    //系统事件回调一小时以上
     if(now_ms < m_previousTime && now_ms < (m_previousTime - 60 * 60 * 1000)){
         rollover = true;
     }
