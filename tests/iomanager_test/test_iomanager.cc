@@ -27,7 +27,7 @@ void test_fibre(){
     memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
     addr.sin_port = htons(80);
-    inet_pton(AF_INET, "192.168.0.112", &addr.sin_addr.s_addr);
+    inet_pton(AF_INET, "192.168.205.137", &addr.sin_addr.s_addr);
 
     if(!connect(sock, (const sockaddr*)&addr, sizeof(addr))){
 
