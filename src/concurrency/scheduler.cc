@@ -144,6 +144,7 @@ void Scheduler::run(){
     }
 
     Fibre::ptr idle_fibre(new Fibre(std::bind(&Scheduler::idle, this)));
+    HPGS_LOG_INFO(g_logger) << "create idle fibre";
     Fibre::ptr cb_fibre;
 
     FibreAndThread ft;

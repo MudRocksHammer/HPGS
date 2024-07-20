@@ -26,14 +26,16 @@ void test_fibre(){
     sockaddr_in addr;
     memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
-    addr.sin_port = htons(80);
+    addr.sin_port = htons(2000);
+    //addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    //convert IPv4 and IPv6 addresses from text to binary form
     inet_pton(AF_INET, "192.168.205.137", &addr.sin_addr.s_addr);
 
-    if(!connect(sock, (const sockaddr*)&addr, sizeof(addr))){
-
+    if(!connect(sock, (struct sockaddr*)&addr, sizeof(addr))){
+        HPGS_LOG_INFO(g_logger) << "connected succed";
     }
     else if(errno == EINPROGRESS){
-        HPGS_LOG_INFO(g_logger) << "add evemt errno = " << errno << " " << strerror(errno);
+        HPGS_LOG_INFO(g_logger) << "add event errno = " << errno << " " << strerror(errno);
         HPGS::IOManager::GetThis()->addEvent(sock, HPGS::IOManager::READ, [](){
             HPGS_LOG_INFO(g_logger) << "read callback";
         });
@@ -50,15 +52,16 @@ void test_fibre(){
 }
 
 void test1(){
-    std::cout << "RPOLLIN = " << EPOLLIN
+    std::cout << "EPOLLIN = " << EPOLLIN
               << " EPOLLOUT = " << EPOLLOUT << std::endl;
-    HPGS::IOManager iom(2, false);
+    HPGS::IOManager iom(3, false);
+    HPGS_LOG_INFO(g_logger) << "end create iomanager";
     iom.schedule(&test_fibre);
 }
 
 HPGS::Timer::ptr s_timer;
 void test_timer(){
-    HPGS::IOManager iom(2);
+    HPGS::IOManager iom(1);
     s_timer = iom.addTimer(1000, [](){
         static int i = 0;
         HPGS_LOG_INFO(g_logger) << "hello timer i = " << i;

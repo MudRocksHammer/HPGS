@@ -113,12 +113,13 @@ IOManager::IOManager(size_t threads, bool use_caller, const std::string& name)
     rt = fcntl(m_tickleFds[0], F_SETFL, O_NONBLOCK);
     HPGS_ASSERT(!rt);
 
-    //将管道的都描述符加入epoll多路复用，如果管道可读，idle中的epoll_wait会返回
+    //将管道的读描述符加入epoll多路复用，如果管道可读，idle中的epoll_wait会返回
     rt = epoll_ctl(m_epfd, EPOLL_CTL_ADD, m_tickleFds[0], &event);
     HPGS_ASSERT(!rt);
 
     //初始化fdContext
     contextResize(32);
+    HPGS_LOG_INFO(g_logger) << "create iomanager succeed";
 
     //开启调度器
     start();
@@ -346,7 +347,7 @@ bool IOManager::stopping(){
 }
 
 /**
- * @details 对于io协程调度来说，应阻塞在等待IO事件上，idle退出的时机是epoll_wait返回，
+ * @details 对于io协程调度来说，idle时应阻塞在等待IO事件上，idle退出的时机是epoll_wait返回，
  * 对应的操作是tickle或注册的IO事件就绪。调度器没有任务时会阻塞在idle协程上，对IO调度器来说，
  * idle状态应该关注两件事，一是有没有新的调度任务发生，对应Scheduler::schedule()函数，
  * 如果有新的任务，应该立即退出idle执行新的任务；二是关注当前注册的所有IO事件有没有触发，
@@ -454,11 +455,13 @@ void IOManager::idle(){
             }
         }// end for 
 
+        //不idel了换出去
         Fibre::ptr cur = Fibre::GetThis();
         auto raw_ptr = cur.get();
         cur.reset();
 
         raw_ptr->swapOut();
+
     }//end while(true)
 }
 
