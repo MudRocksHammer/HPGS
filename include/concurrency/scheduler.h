@@ -112,7 +112,7 @@ protected:
     void run();
 
     /**
-     * @brief 返回是否可以停止
+     * @brief 返回是否可以停止,开启自动停止，且正在停止，且任务队列为空，且没有在工作的协程
      */
     virtual bool stopping();
 

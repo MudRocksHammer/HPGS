@@ -110,12 +110,13 @@ public:
      * @param[in] cb 定时器回调函数
      * @param[in] weak_cond 条件
      * @param[in] recurring 是否循环
+     * @details 可以将weak_ptr指向一个应该存在的object，如果weak_ptr可以通过lock获取该object，则条件成立
      */
     Timer::ptr addConditionTimer(uint64_t ms, std::function<void()> cb
                                 , std::weak_ptr<void> weak_cond, bool recurring = false);
 
     /**
-     * @brief 到最近一个定时器执行的时间间隔(ms)
+     * @brief 获取到最近一个定时器执行的时间间隔(ms)
      */
     uint64_t getNextTimer();
 
