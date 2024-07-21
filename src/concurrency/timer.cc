@@ -115,6 +115,7 @@ Timer::ptr TimerManager::addConditionTimer(uint64_t ms, std::function<void()> cb
 uint64_t TimerManager::getNextTimer(){
     RWMutexType::ReadLock lock(m_mutex);
     m_tickled = false;
+    //定时器没有任务待执行返回~0ull
     if(m_timers.empty()){
         return ~0ull;
     }
@@ -172,16 +173,24 @@ void TimerManager::listExpiredCb(std::vector<std::function<void()> >& cbs){
 }
 
 void TimerManager::addTimer(Timer::ptr val, RWMutexType::WriteLock& lock){
+    /**
+     * insert return a pair
+     * with its member pair::first set to an iterator pointing to either the newly 
+     * inserted element or to the equivalent element already in the set
+     * second is set to true if a new element was inserted or false if an equivalent element already existed.
+     */
     auto it = m_timers.insert(val).first;
+
+    //如果插入的Timer是在第一个且没有触发m_ticle
     bool at_front = (it == m_timers.begin()) && !m_tickled;
     if(at_front){
         m_tickled = true;
     }
     lock.unlock();
 
-    // if(at_front){
-    //     onTimerInsertAtFront();
-    // }
+    if(at_front){
+        onTimerInsertAtFront();
+    }
 }
 
 bool TimerManager::detectClockRollover(uint64_t now_ms){

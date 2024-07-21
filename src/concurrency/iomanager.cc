@@ -369,6 +369,9 @@ void IOManager::idle(){
                                     << " idle stopping exit";
             break;
         }
+        else{
+            //HPGS_LOG_INFO(g_logger) << "idle";
+        }
 
         int rt = 0;
         do{
@@ -383,8 +386,10 @@ void IOManager::idle(){
             //阻塞在epoll_wait上，等待事件发生
             rt = epoll_wait(m_epfd, events, MAX_EVENTS, (int)next_timeout);
             if(rt < 0 && errno == EINTR){
+                //epoll_wait 发生错误
             }
             else{
+                //收到事件或正常超时
                 break;
             }
         }while(true);
@@ -455,7 +460,7 @@ void IOManager::idle(){
             }
         }// end for 
 
-        //不idel了换出去
+        //不idle了换出去
         Fibre::ptr cur = Fibre::GetThis();
         auto raw_ptr = cur.get();
         cur.reset();

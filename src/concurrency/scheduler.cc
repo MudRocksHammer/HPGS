@@ -266,7 +266,6 @@ void Scheduler::tickle(){
     HPGS_LOG_INFO(g_logger) << "tickle";
 }
 
-//开启自动停止，且正在停止，且任务队列为空，且没有在工作的协程
 bool Scheduler::stopping() {
     MutexType::Lock lock(m_mutex);
     return m_autoStop && m_stopping && m_fibres.empty() && m_activeThreadCount == 0;
