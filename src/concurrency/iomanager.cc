@@ -257,6 +257,7 @@ bool IOManager::cancelEvent(int fd, Event event){
     lock.unlock();
 
     FdContext::MutexType::Lock lock2(fd_ctx->mutex);
+    //没有这个event
     if(HPGS_UNLIKELY(!(fd_ctx->events & event))){
         return false;
     }

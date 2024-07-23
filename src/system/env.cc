@@ -14,7 +14,10 @@ bool Env::init(int argc, char* argv[]){
     char link[1024] = {0};
     char path[1024] = {0};
     sprintf(link, "/proc/%d/exe", getpid());
-    readlink(link, path, sizeof(path));
+    if(-1 == readlink(link, path, sizeof(path))){
+        perror("read link failed");
+        return false;
+    }
     m_exe = path;
 
     auto pos = m_exe.find_last_of("/");

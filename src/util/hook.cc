@@ -71,6 +71,7 @@ struct _HookIniter {
     }
 };
 
+//hook_init() 放在一个静态对象的构造函数中调用，这表示在main函数运行之前就会获取各个符号的地址并保存在全局变量中。
 static _HookIniter s_hook_initer;
 
 bool is_hook_enable(){
@@ -97,7 +98,7 @@ static ssize_t do_io(int fd, OriginFun fun, const char* hook_fun_name
         return fun(fd, std::forward<Args>(args)...);
     }
 
-    HPGS::FdCtx::ptr ctx = HPGS::FdMgr::GetInstance()->get(fd);
+    HPGS::FdCtx::ptr ctx = HPGS::fdMgr::GetInstance()->get(fd);
     if(!ctx){
         return fun(fd, std::forward<Args>(args)...);
     }
@@ -128,7 +129,7 @@ retry:
         if(to != (uint64_t)-1){
             timer = iom->addConditionTimer(to, [winfo, fd, iom, event](){
                 auto t = winfo.lock();
-                if(!t || t->canceller){
+                if(!t || t->cancelled){
                     return;
                 }
                 t->cancelled = ETIMEDOUT;
@@ -189,7 +190,7 @@ int usleep(useconds_t usec){
 
     HPGS::Fibre::ptr fibre = HPGS::Fibre::GetThis();
     HPGS::IOManager* iom = HPGS::IOManager::GetThis();
-    iom->addTimer(use / 1000, std::bind(
+    iom->addTimer(usec / 1000, std::bind(
         (void(HPGS::Scheduler::*)(HPGS::Fibre::ptr, int))&HPGS::IOManager::schedule, iom, fibre, -1
     ));
     HPGS::Fibre::YieldToHold();
@@ -205,7 +206,7 @@ int nanosleep(const struct timespec* req, struct timespec* rem){
     HPGS::Fibre::ptr fibre = HPGS::Fibre::GetThis();
     HPGS::IOManager* iom = HPGS::IOManager::GetThis();
     iom->addTimer(timeout_ms, std::bind(
-        (HPGS::Fibre::ptr, int)HPGS::IOManager::schedule, iom, fibre, -1
+        (void(HPGS::Scheduler::*)(HPGS::Fibre::ptr, int))&HPGS::IOManager::schedule, iom, fibre, -1
     ));
     HPGS::Fibre::YieldToHold();
     return 0;
@@ -233,14 +234,17 @@ int connect_with_timeout(int fd, const struct sockaddr* addr, socklen_t addrlen,
         return -1;
     }
 
+    //不为套接字
     if(!ctx->isSocket()){
         return connect_f(fd, addr, addrlen);
     }
 
+    //非阻塞
     if(ctx->getUserNonblock()){
         return connect_f(fd, addr, addrlen);
     }
 
+    //套接字是非阻塞的，这里会返回EINPROGRESS错误
     int n = connect_f(fd, addr, addrlen);
     if(n == 0){
         return 0;
@@ -254,24 +258,29 @@ int connect_with_timeout(int fd, const struct sockaddr* addr, socklen_t addrlen,
     std::shared_ptr<timer_info> tinfo(new timer_info);
     std::weak_ptr<timer_info> winfo(tinfo);
 
+    //非阻塞
     if(timeout_ms != (uint64_t)-1){
+        //设置一个timeout的定时器，等待连接时间yield
         timer = iom->addConditionTimer(timeout_ms, [winfo, fd, iom](){
             auto t = winfo.lock();
             if(!t || t->cancelled){
                 return;
             }
             t->cancelled = ETIMEDOUT;
+            //定时器触发则等待超时，取消write事件
             iom->cancelEvent(fd, HPGS::IOManager::WRITE);
         }, winfo);
     }
 
+    //添加write事件并yield，等待超时或socket可写，如果先超时，触发write事件，协程从yield点返回，通过超时标志设置errno并返回-1
+    //如果超时前可写了，则取消定时器，
     int rt = iom->addEvent(fd, HPGS::IOManager::WRITE);
     if(rt == 0){
         HPGS::Fibre::YieldToHold();
         if(timer){
             timer->cancel();
         }
-        if(timer->cancel){
+        if(tinfo->cancelled){
             errno = tinfo->cancelled;
             return -1;
         }
@@ -297,12 +306,16 @@ int connect_with_timeout(int fd, const struct sockaddr* addr, socklen_t addrlen,
     }   
 }
 
-int connect(int sockfd, const struct sockaddr* addr, socklent_t addrlen){
-    return connect_with_timeout(sockfd, addr, HPGS::s_connect_timeout);
+int connect(int sockfd, const struct sockaddr* addr, socklen_t addrlen){
+    return connect_with_timeout(sockfd, addr, addrlen, HPGS::s_connect_timeout);
 }
 
 int accept(int s, struct sockaddr* addr, socklen_t* addrlen){
     int fd = do_io(s, accept_f, "accept", HPGS::IOManager::READ, SO_RCVTIMEO, addr, addrlen);
+    if(fd >= 0){
+        HPGS::fdMgr::GetInstance()->get(fd, true);
+    }
+    return fd;
 }
 
 ssize_t read(int fd, void* buf, size_t count){
@@ -330,19 +343,19 @@ ssize_t write(int fd, const void* buf, size_t count){
 }
 
 ssize_t writev(int fd, const struct iovec *iov, int iovcnt) {
-    return do_io(fd, writev_f, "writev", sylar::IOManager::WRITE, SO_SNDTIMEO, iov, iovcnt);
+    return do_io(fd, writev_f, "writev", HPGS::IOManager::WRITE, SO_SNDTIMEO, iov, iovcnt);
 }
 
 ssize_t send(int s, const void *msg, size_t len, int flags) {
-    return do_io(s, send_f, "send", sylar::IOManager::WRITE, SO_SNDTIMEO, msg, len, flags);
+    return do_io(s, send_f, "send", HPGS::IOManager::WRITE, SO_SNDTIMEO, msg, len, flags);
 }
 
 ssize_t sendto(int s, const void *msg, size_t len, int flags, const struct sockaddr *to, socklen_t tolen) {
-    return do_io(s, sendto_f, "sendto", sylar::IOManager::WRITE, SO_SNDTIMEO, msg, len, flags, to, tolen);
+    return do_io(s, sendto_f, "sendto", HPGS::IOManager::WRITE, SO_SNDTIMEO, msg, len, flags, to, tolen);
 }
 
 ssize_t sendmsg(int s, const struct msghdr *msg, int flags) {
-    return do_io(s, sendmsg_f, "sendmsg", sylar::IOManager::WRITE, SO_SNDTIMEO, msg, flags);
+    return do_io(s, sendmsg_f, "sendmsg", HPGS::IOManager::WRITE, SO_SNDTIMEO, msg, flags);
 }
 
 int close(int fd){
@@ -371,7 +384,7 @@ int fcntl(int fd, int cmd, ...){
                 va_end(va);
                 HPGS::FdCtx::ptr ctx = HPGS::fdMgr::GetInstance()->get(fd);
                 if(!ctx || ctx->isClose() || !ctx->isSocket()){
-                    return fcntl(fd, cmd, arg);
+                    return fcntl_f(fd, cmd, arg);
                 }
                 ctx->setUserNonblock(arg & O_NONBLOCK);
                 if(ctx->getSysNonblock()){
@@ -410,7 +423,7 @@ int fcntl(int fd, int cmd, ...){
         case F_SETPIPE_SZ:
 #endif  
             {
-                int arg = v_arg(va, int);
+                int arg = va_arg(va, int);
                 va_end(va);
                 return fcntl_f(fd, cmd, arg);
             }
@@ -424,7 +437,7 @@ int fcntl(int fd, int cmd, ...){
 #endif
             {
                 va_end(va);
-                return fcntl(fd, cmd);
+                return fcntl_f(fd, cmd);
             }
             break;
         case F_SETLK:
@@ -433,7 +446,7 @@ int fcntl(int fd, int cmd, ...){
             {
                 struct f_owner_exlock* arg = va_arg(va, struct f_owner_exlock*);
                 va_end(va);
-                return fcntl(fd, cmd, arg);
+                return fcntl_f(fd, cmd, arg);
             }
             break;
         default:
@@ -459,7 +472,11 @@ int ioctl(int d, unsigned long int request, ...){
     return ioctl_f(d, request, arg);
 }
 
-int getsockopt(ont sockfd, int level, int optname, const void* optval, socklen_t optlen){
+int getsockopt(int sockfd, int level, int optname, void* optval, socklen_t* optlen){
+    return getsockopt_f(sockfd, level, optname, optval, optlen);
+}
+
+int setsockopt(int sockfd, int level, int optname, const void* optval, socklen_t optlen){
     if(!HPGS::t_hook_enable){
         return setsockopt_f(sockfd, level, optname, optval, optlen);
     }
