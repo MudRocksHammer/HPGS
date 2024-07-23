@@ -62,14 +62,14 @@ public:
 
     /**
      * @brief 设置超时时间
-     * @param[in] type 类型SO_RCVTIMEO(读超时), SO_SBDTIMEO(写超时)
+     * @param[in] type 类型SO_RCVTIMEO(读超时), SO_SNDTIMEO(写超时)
      * @param[in] v 时间毫秒
      */
     void setTimeout(int type, uint64_t v);
 
     /**
      * @brief 获取超时时间
-     * @param[in] 类型SO_RCVTIMEO(读超时), SO_SBDTIMEO(写超时)
+     * @param[in] 类型SO_RCVTIMEO(读超时), SO_SNDTIMEO(写超时)
      * @return 超时时间毫秒
      */
     uint64_t getTimeout(int type);
@@ -108,7 +108,7 @@ public:
     /**
      * @brief 无参构造函数
      */
-    FdMnager();
+    FdManager();
 
     /**
      * @brief 获取/创建文件fd类FdCtx
