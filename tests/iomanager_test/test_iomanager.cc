@@ -41,8 +41,8 @@ void test_fibre(){
     //addr.sin_addr.s_addr = htonl(INADDR_ANY);
     //convert IPv4 and IPv6 addresses from text to binary form
     inet_pton(AF_INET, "192.168.205.137", &addr.sin_addr.s_addr);
-
     if(!connect(sock, (struct sockaddr*)&addr, sizeof(addr))){
+
         HPGS_LOG_INFO(g_logger) << "connected succed";
     }
     else if(errno == EINPROGRESS){

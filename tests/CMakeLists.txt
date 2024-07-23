@@ -2,5 +2,6 @@
 #add_subdirectory(config_test)
 #add_subdirectory(fibre_test)
 #add_subdirectory(thread_test)
-add_subdirectory(scheduler_test)
-add_subdirectory(iomanager_test)
+#add_subdirectory(scheduler_test)
+#add_subdirectory(iomanager_test)
+add_subdirectory(hook_test)
