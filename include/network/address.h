@@ -64,7 +64,7 @@ public:
      * @param[in] protocol 协议,IPPROTO_TCP、IPPROTO_UDP 等
      * @return 返回满足条件的任意IPAddress,失败返回nullptr
      */
-    static std::shared_ptr<IPAddress> LokkupAnyIPAddress(const std::string& host, 
+    static std::shared_ptr<IPAddress> LookupAnyIPAddress(const std::string& host, 
                             , int family = AF_INET, int type = 0, int protocol = 0);
 
     /**
@@ -105,7 +105,215 @@ public:
      */
     virtual std::ostream& insert(std::ostream& os) const = 0;
 
+    /**
+     * @brief 返回可读性字符串
+     */
+    std::string toString() const;
+
+    /**
+     * @brief 小于号比较
+     */
+    bool operator<(const Address& rhs) const;
+
+    /**
+     * @brief 等于函数
+     */
+    bool operator==(const Address& rhs) const;
+
+    /**
+     * @brief 不等于函数
+     */
+    bool operator!=(const Address& rhs) const;
+
 };
+
+/**
+ * @brief Ip地址基类
+ */
+class IPAddress : public Address {
+public:
+    typedef std::shared_ptr<IPAddress> ptr;
+
+    /**
+     * @brief 通过域名,IP,服务器名创建IPAddress
+     * @param[in] address 域名,IP,服务器名等.举例: www.sylar.top
+     * @param[in] port 端口号
+     * @return 调用成功返回IPAddress,失败返回nullptr
+     */
+    static IPddress::ptr Create(const char* address, uint16_t port = 0);
+
+    /**
+     * @brief 获取该地址的广播地址
+     * @param[in] prefix_len 子网掩码位数
+     * @return 调用成功返回IPAddress,失败返回nullptr
+     */
+    virtual IPAddress::ptr broadcastAddress(uint32_t prefix_len) = 0;
+
+    /**
+     * @brief 获取该地址的网段
+     * @param[in] prefix_len 子网掩码位数
+     * @return 调用成功返回IPAddress,失败返回nullptr
+     */ 
+    virtual IPAddress::pre networkAddress(uint32_t prefix_len) = 0;
+
+    /**
+     * @brief 获取子网掩码地址
+     * @param[in] prefix_len 子网掩码位数
+     * @return 调用成功返回IPAddress,失败返回nullptr
+     */
+    virtual IPAddress::ptr subnetMask(uint32_t prefix_len) = 0;
+
+    /**
+     * @brief 返回端口号
+     */
+    virtual uint32_t getPort() const = 0;
+
+    /**
+     * @brief 设置端口号
+     */
+    virtual void setPort(uint16_t v) = 0;
+};
+
+/**
+ * @brief IPv4
+ */
+class IPv4Address : public IPAddress{
+public:
+    typedef std::shared_ptr<IPv4Address> ptr;
+
+    /**
+     * @brief 使用点分十进制地址创建IPv4Address
+     * @param[in] address 点分十进制地址
+     * @param[in] prot 端口号
+     * @return 返回IPv4Address,失败返回nullptr
+     */
+    static IPv4Address::ptr Create(const char* address, uint64_t port = 0);
+
+    /**
+     * @brief 通过sockaddr_in 构造IPv4Address
+     * @param[in] address sockaddr_in结构体
+     */
+    IPv4Address(const sockaddr_in& address);
+
+    /**
+     * @brief 通过二进制地址构造IPv4Address
+     * @param[in] address 二进制地址address
+     * @param[in] port 端口号
+     */
+    IPv4Address(uint32_t address = INADDR_ANY, uint16_t port = 0);
+
+    const sockaddr* getAddr() const override;
+    sockaddr* getAddr() override;
+    socklen_t getAddrlen() const override;
+    std::ostream& insert(std::ostream& os) const override;
+
+    IPAddress::ptr broadcastAddress(uint32_t prefix_len) override;
+    IPAddress::ptr networkAddress(uint32_t prefix_len) override;
+    IPAddress::ptr subnetMask(uint32_t prefix_len) override;
+    uint32_t getPort() const override;
+    void setPort(uint16_t v) override;
+
+private:
+    sockaddr_in m_addr;
+};
+
+/**
+ * @brief IPv6地址
+ */
+class IPv6Address : public IPAddress{
+public:
+    typedef std::shared_ptr<IPv6Address> ptr;
+
+    /**
+     * @brief 通过IPv6地址字符串构造IPv6Address
+     * @param[in] address IPv6地址字符串
+     * @param[in] port 端口号
+     */
+    static IPv6Address::ptr Create(const char* address, uint16_t port = 0);
+
+    /**
+     * @brief 无参构造函数
+     */
+    IPv6Address();
+
+    /**
+     * @brief 通过sockaddr_in6构造IPv6Address
+     * @param[in] address sockaddr_in6结构体
+     */
+    IPv6Address(const sockaddr_in6 address);
+
+    /**
+     * @brief 通过IPv6二进制地址来构造IPv6Address
+     * @param[in] address IPv6二进制地址
+     */
+    IPv6Address(const uint8_t addres[16], uint16_t port = 0);
+
+    const sockaddr* getAddr() const override;
+    sockaddr* getAddr() override;
+    socklen_t getAddrlen() const override;
+    std::ostream& insert(std::ostream& os) const override;
+
+    IPAddress::ptr broadcastAddress(uin32_t prefix_len) override;
+    IPAddress::ptr networkAddress(uint32_t prefix_len) override;
+    IPAddress::ptr subnetMask(uint32_t prefix_len) override;
+    uint32_t getPort() const override;
+    void setPort(uint16_t v) override;
+
+private:
+    sockaddr_in6 m_addr;
+};
+
+/**
+ * @biref UnixSocket地址
+ */
+class UnixAddress : public Address {
+public:
+    typedef std::shared_ptr<UnixAddress> ptr;
+
+    /**
+     * @brief 无参构造函数
+     */
+    UnixAddress();
+
+    /**
+     * @brief 通过路径构造UnixAddress
+     * @param[in] path UnixSocket路径(长度小于UNIX_PATH_MAX)
+     */
+    UnixAddress(const std::string& path);
+
+    const sockaddr* getAddr() const override;
+    sockaddr* getAddr() override;
+     socklen_t getAddrLen() const override;
+    void setAddrLen(uint32_t v);
+    std::string getPath() const;
+    std::ostream& insert(std::ostream& os) const override;
+
+private:
+    sockaddr_un m_addr;
+    socklen_t m_length;
+};
+
+/**
+ * @brief 未知地址
+ */
+class UnknowAddress : public Address {
+public:
+    typedef std::shared_ptr<UnixAddress> ptr;
+    UnknowAddress(int family);
+    UnknowAddress(const sockaddr& addr);
+    const sockaddr* getAddr() override;
+    sockaddr* getAddr() override;
+    socklen_t getAddrLen() const override;
+    std::ostream& insert(std::ostream& os) const override;
+
+private:
+    sockaddr m_addr;
+};
+
+/**
+ * @brief 流式输出Address
+ */
+std::ostream& operator<<(std::ostream& os, const Address& addr);
 
 }
 
