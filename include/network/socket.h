@@ -9,7 +9,7 @@
 #include <openssl/err.h>
 #include <openssl/ssl.h>
 #include "noncopyable.h"
-//#include "address.h"
+#include "myaddress.h"
 
 
 namespace HPGS{
@@ -64,7 +64,7 @@ public:
     /**
      * @brief 创建IPv4 的 UDP Socket
      */
-    static Socket::ptr CreateUdoSocket();
+    static Socket::ptr CreateUdpSocket();
 
     /**
      * @brief 创建IPv6 的 TCP Socket
@@ -122,7 +122,7 @@ public:
     /**
      * @brief 获取socketopt @see getsockopt
      */
-    bool getOption(int level, int option, void* result, sockelen_t* len);
+    bool getOption(int level, int option, void* result, socklen_t* len);
 
     /**
      * @brief 获取socketopt 模板 @see getsockopt
@@ -204,7 +204,7 @@ public:
      *      @retval = 0 socket被关闭
      *      @retval < 0 socket出错
      */
-    virtual int send(const iovec* bufferm size_t length, int flags = 0);
+    virtual int send(const iovec* buffer, size_t length, int flags = 0);
 
     /**
      * @brief 发送数据
@@ -403,7 +403,7 @@ public:
     virtual bool listen(int backlog = SOMAXCONN) override;
     virtual bool close() override;
     virtual int send(const void* buffer, size_t length, int flags = 0) override;
-    virtual int send(const iovec* buffers, size_t length, int flags = 0) override;
+    virtual int send(const iovec* buffer, size_t length, int flags = 0) override;
     virtual int sendTo(const void* buffer, size_t length, const Address::ptr to, int flags = 0) override;
     virtual int sendTo(const iovec* buffers, size_t length, const Address::ptr to, int flags = 0) override;
     virtual int recv(void* buffer, size_t length, int flags = 0) override;

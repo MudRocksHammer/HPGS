@@ -14,7 +14,7 @@
 #include <map>
 
 
-namespace{
+namespace HPGS {
 
 class IPAddress;
 
@@ -31,7 +31,7 @@ public:
      * @param[in] addrlen sockaddr的长度
      * @return 返回和socket相匹配的Address,失败返回nullptr
      */
-    static Address::ptr Create(const sockaddr* addr, sockelen_t addrlen);
+    static Address::ptr Create(const sockaddr* addr, socklen_t addrlen);
 
     /**
      * @brief 通过host地址返回对应条件的所有Address
@@ -64,7 +64,7 @@ public:
      * @param[in] protocol 协议,IPPROTO_TCP、IPPROTO_UDP 等
      * @return 返回满足条件的任意IPAddress,失败返回nullptr
      */
-    static std::shared_ptr<IPAddress> LookupAnyIPAddress(const std::string& host, 
+    static std::shared_ptr<IPAddress> LookupAnyIPAddress(const std::string& host
                             , int family = AF_INET, int type = 0, int protocol = 0);
 
     /**
@@ -73,7 +73,17 @@ public:
      * @param[in] family 协议簇(AF_INET, AF_INET6, AF_UNIX)
      * @return 是否获取成功 
      */
-    static bool GetInterfaceAddress(std::multimap<std::string, std::pair<Address::ptr, uint32_t> >& result, int family = AF_INET);
+    static bool GetInterfaceAddresses(std::multimap<std::string, std::pair<Address::ptr, uint32_t> >& result, int family = AF_INET);
+
+    /**
+     * @brief 获取指定网卡的地址和子网掩码位数
+     * @param[out] result 保存指定网卡所有地址
+     * @param[in] iface 网卡名称
+     * @param[in] family 协议族(AF_INT, AF_INT6, AF_UNIX)
+     * @return 是否获取成功
+     */
+    static bool GetInterfaceAddresses(std::vector<std::pair<Address::ptr, uint32_t> >&result
+                    ,const std::string& iface, int family = AF_INET);
 
     /**
      * @brief 虚析构函数
@@ -140,7 +150,7 @@ public:
      * @param[in] port 端口号
      * @return 调用成功返回IPAddress,失败返回nullptr
      */
-    static IPddress::ptr Create(const char* address, uint16_t port = 0);
+    static IPAddress::ptr Create(const char* address, uint16_t port = 0);
 
     /**
      * @brief 获取该地址的广播地址
@@ -154,7 +164,7 @@ public:
      * @param[in] prefix_len 子网掩码位数
      * @return 调用成功返回IPAddress,失败返回nullptr
      */ 
-    virtual IPAddress::pre networkAddress(uint32_t prefix_len) = 0;
+    virtual IPAddress::ptr networkAddress(uint32_t prefix_len) = 0;
 
     /**
      * @brief 获取子网掩码地址
@@ -187,7 +197,7 @@ public:
      * @param[in] prot 端口号
      * @return 返回IPv4Address,失败返回nullptr
      */
-    static IPv4Address::ptr Create(const char* address, uint64_t port = 0);
+    static IPv4Address::ptr Create(const char* address, uint16_t port = 0);
 
     /**
      * @brief 通过sockaddr_in 构造IPv4Address
@@ -240,7 +250,7 @@ public:
      * @brief 通过sockaddr_in6构造IPv6Address
      * @param[in] address sockaddr_in6结构体
      */
-    IPv6Address(const sockaddr_in6 address);
+    IPv6Address(const sockaddr_in6& address);
 
     /**
      * @brief 通过IPv6二进制地址来构造IPv6Address
@@ -253,7 +263,7 @@ public:
     socklen_t getAddrlen() const override;
     std::ostream& insert(std::ostream& os) const override;
 
-    IPAddress::ptr broadcastAddress(uin32_t prefix_len) override;
+    IPAddress::ptr broadcastAddress(uint32_t prefix_len) override;
     IPAddress::ptr networkAddress(uint32_t prefix_len) override;
     IPAddress::ptr subnetMask(uint32_t prefix_len) override;
     uint32_t getPort() const override;
@@ -264,7 +274,7 @@ private:
 };
 
 /**
- * @biref UnixSocket地址
+ * @brief UnixSocket地址
  */
 class UnixAddress : public Address {
 public:
@@ -283,8 +293,8 @@ public:
 
     const sockaddr* getAddr() const override;
     sockaddr* getAddr() override;
-     socklen_t getAddrLen() const override;
-    void setAddrLen(uint32_t v);
+    socklen_t getAddrlen() const override;
+    void setAddrlen(uint32_t v);
     std::string getPath() const;
     std::ostream& insert(std::ostream& os) const override;
 
@@ -296,14 +306,16 @@ private:
 /**
  * @brief 未知地址
  */
-class UnknowAddress : public Address {
+class UnknownAddress : public Address {
 public:
     typedef std::shared_ptr<UnixAddress> ptr;
-    UnknowAddress(int family);
-    UnknowAddress(const sockaddr& addr);
-    const sockaddr* getAddr() override;
+
+    UnknownAddress(int family);
+    UnknownAddress(const sockaddr& addr);
+
+    const sockaddr* getAddr() const override;
     sockaddr* getAddr() override;
-    socklen_t getAddrLen() const override;
+    socklen_t getAddrlen() const override;
     std::ostream& insert(std::ostream& os) const override;
 
 private:

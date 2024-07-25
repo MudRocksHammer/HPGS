@@ -1,12 +1,12 @@
 /**
  * @brief 字节序操作函数(大端/小端)
  */
-#ifnedef __HPGS_ENDIAN_H__
+#ifndef __HPGS_ENDIAN_H__
 #define __HPGS_ENDIAN_H__
 
 
-#define HPGS_LITTLE_ENDIAN
-#define HPGS_BIG_ENDIAN
+#define HPGS_LITTLE_ENDIAN 1
+#define HPGS_BIG_ENDIAN 2
 
 #include <byteswap.h>
 #include <stdint.h>
