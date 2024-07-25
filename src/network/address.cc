@@ -1,13 +1,13 @@
-#include "address.h"
+#include "myaddress.h"
 #include "log.h"
 #include <sstream>
 #include <netdb.h>
 #include <ifaddrs.h>
 #include <stddef.h>
 
-#include "endian.h"
+#include "myendian.h"
 
-namespace {
+namespace HPGS {
 
 static HPGS::Logger::ptr g_logger = HPGS_LOG_NAME("system");
 
@@ -74,7 +74,7 @@ bool Address::Lookup(std::vector<Address::ptr>& result, const std::string& host,
 
     //检查 node service
     if(node.empty()){
-        service = (const char*)memchr(host.c_str(), ":", host.size());
+        service = (const char*)memchr(host.c_str(), ':', host.size());
         if(service){
             if(!memchr(service + 1, ':', host.c_str() + host.size() - service - 1)){
                 node = host.substr(0, service - host.c_str());
@@ -105,7 +105,7 @@ bool Address::Lookup(std::vector<Address::ptr>& result, const std::string& host,
     return !result.empty();
 }
 
-bool Address::GetInterfaceAddress(std::multimap<std::string, std::pair<Address::ptr, uint32_t> >& result, int family){
+bool Address::GetInterfaceAddresses(std::multimap<std::string, std::pair<Address::ptr, uint32_t> >& result, int family){
     struct ifaddrs *next, *results;
     if(getifaddrs(&results) != 0){
         HPGS_LOG_DEBUG(g_logger) << "Address::GetInterfaceAddresses getifaddrs "
@@ -207,28 +207,28 @@ Address::ptr Address::Create(const sockaddr* addr, socklen_t addrlen) {
             result.reset(new IPv6Address(*(const sockaddr_in6*)addr));
             break;
         default:
-            result.reset(new UnknownAddress(*addr));
+            //result.reset(new UnknownAddress(*addr));
             break;
     }
     return result;
 }
 
 bool Address::operator<(const Address& rhs) const {
-    socklen_t minlen = std::min(getAddrLen(), rhs.getAddrLen());
+    socklen_t minlen = std::min(getAddrlen(), rhs.getAddrlen());
     int result = memcmp(getAddr(), rhs.getAddr(), minlen);
     if(result < 0) {
         return true;
     } else if(result > 0) {
         return false;
-    } else if(getAddrLen() < rhs.getAddrLen()) {
+    } else if(getAddrlen() < rhs.getAddrlen()) {
         return true;
     }
     return false;
 }
 
 bool Address::operator==(const Address& rhs) const {
-    return getAddrLen() == rhs.getAddrLen()
-        && memcmp(getAddr(), rhs.getAddr(), getAddrLen()) == 0;
+    return getAddrlen() == rhs.getAddrlen()
+        && memcmp(getAddr(), rhs.getAddr(), getAddrlen()) == 0;
 }
 
 bool Address::operator!=(const Address& rhs) const {
@@ -296,7 +296,7 @@ const sockaddr* IPv4Address::getAddr() const {
     return (sockaddr*)&m_addr;
 }
 
-socklen_t IPv4Address::getAddrLen() const {
+socklen_t IPv4Address::getAddrlen() const {
     return sizeof(m_addr);
 }
 
@@ -321,7 +321,7 @@ IPAddress::ptr IPv4Address::broadcastAddress(uint32_t prefix_len) {
     return IPv4Address::ptr(new IPv4Address(baddr));
 }
 
-IPAddress::ptr IPv4Address::networdAddress(uint32_t prefix_len) {
+IPAddress::ptr IPv4Address::networkAddress(uint32_t prefix_len) {
     if(prefix_len > 32) {
         return nullptr;
     }
@@ -385,7 +385,7 @@ const sockaddr* IPv6Address::getAddr() const {
     return (sockaddr*)&m_addr;
 }
 
-socklen_t IPv6Address::getAddrLen() const {
+socklen_t IPv6Address::getAddrlen() const {
     return sizeof(m_addr);
 }
 
@@ -425,7 +425,7 @@ IPAddress::ptr IPv6Address::broadcastAddress(uint32_t prefix_len) {
     return IPv6Address::ptr(new IPv6Address(baddr));
 }
 
-IPAddress::ptr IPv6Address::networdAddress(uint32_t prefix_len) {
+IPAddress::ptr IPv6Address::networkAddress(uint32_t prefix_len) {
     sockaddr_in6 baddr(m_addr);
     baddr.sin6_addr.s6_addr[prefix_len / 8] &=
         CreateMask<uint8_t>(prefix_len % 8);
@@ -480,7 +480,7 @@ UnixAddress::UnixAddress(const std::string& path) {
     m_length += offsetof(sockaddr_un, sun_path);
 }
 
-void UnixAddress::setAddrLen(uint32_t v) {
+void UnixAddress::setAddrlen(uint32_t v) {
     m_length = v;
 }
 
@@ -492,7 +492,7 @@ const sockaddr* UnixAddress::getAddr() const {
     return (sockaddr*)&m_addr;
 }
 
-socklen_t UnixAddress::getAddrLen() const {
+socklen_t UnixAddress::getAddrlen() const {
     return m_length;
 }
 
@@ -534,7 +534,7 @@ const sockaddr* UnknownAddress::getAddr() const {
     return &m_addr;
 }
 
-socklen_t UnknownAddress::getAddrLen() const {
+socklen_t UnknownAddress::getAddrlen() const {
     return sizeof(m_addr);
 }
 
