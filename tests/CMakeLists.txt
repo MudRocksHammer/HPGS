@@ -4,4 +4,5 @@
 #add_subdirectory(thread_test)
 #add_subdirectory(scheduler_test)
 #add_subdirectory(iomanager_test)
-add_subdirectory(hook_test)
+#add_subdirectory(hook_test)
+add_subdirectory(socket_test)
