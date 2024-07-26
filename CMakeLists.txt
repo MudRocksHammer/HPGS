@@ -3,10 +3,14 @@ project(HPGS)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O3 -fPIC -ggdb -std=c++11 -Wall -Wno-deprecated -Werror -Wno-unused-function -Wno-builtin-macro-redefined -Wno-deprecated-declarations")
-#set(CMAKE_C_FLAGS "$ENV{CXXFLAGS} -rdynamic -O3 -fPIC -ggdb -std=c11 -Wall -Wno-deprecated -Werror -Wno-unused-function -Wno-builtin-macro-redefined -Wno-deprecated-declarations")
+set(CMAKE_C_FLAGS "$ENV{CXXFLAGS} -rdynamic -O3 -fPIC -ggdb -std=c11 -Wall -Wno-deprecated -Werror -Wno-unused-function -Wno-builtin-macro-redefined -Wno-deprecated-declarations")
 
 find_package(yaml-cpp REQUIRED)
 find_package(jsoncpp REQUIRED)
+find_package(OpenSSL REQUIRED)
+if(OPENSSL_FOUND)
+    include_directories(${OPENSSL_INCLUDE_DIR})
+endif()
 
 file(GLOB_RECURSE DIR_SRC "${CMAKE_SOURCE_DIR}/src/*.cc")
 
@@ -14,6 +18,7 @@ set(LIBS yaml-cpp::yaml-cpp
          jsoncpp
          pthread
          dl
+        ${OPENSSL_LIBRARIES}
 )
 
 add_library(HPGS SHARED ${DIR_SRC})

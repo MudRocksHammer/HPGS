@@ -128,7 +128,7 @@ void test2(){
     for(size_t i = 0; i < 10000000000ul; i++){
         if(int err = sock->getError()){
             HPGS_LOG_INFO(g_logger) << "err = " << err << " errstr = " << strerror(err);
-            break; 
+            break;
         }
 
         //struct tcp_info tcp_info;
