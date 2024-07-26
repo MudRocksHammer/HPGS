@@ -83,7 +83,7 @@ bool Address::Lookup(std::vector<Address::ptr>& result, const std::string& host,
         }
     }
 
-     if(node.empty()) {
+    if(node.empty()) {
         node = host;
     }
     int error = getaddrinfo(node.c_str(), service, &hints, &results);
