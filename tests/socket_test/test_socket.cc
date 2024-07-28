@@ -157,7 +157,7 @@ int main(int argc, char* argv[]){
 
     //socket
     HPGS::IOManager iom;
-    //iom.schedule(test_socket);
-    iom.schedule(&test2);
+    iom.schedule(test_socket);
+    //iom.schedule(&test2);
     return 0;
 }
