@@ -332,7 +332,7 @@ public:
     /**
      * @brief 返回socket句柄
      */
-    int getSocket() const { return m_sock;}
+    int getSocket() const { return m_sock; }
 
     /**
      * @brief 取消读
