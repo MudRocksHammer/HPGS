@@ -15,7 +15,7 @@
 namespace HPGS{
 
 /** 
- * @socket封装
+ * @brief socket封装
  */
 class Socket : public std::enable_shared_from_this<Socket>, Noncopyable{
 public:
