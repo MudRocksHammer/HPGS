@@ -6,4 +6,5 @@
 #add_subdirectory(iomanager_test)
 #add_subdirectory(hook_test)
 #add_subdirectory(socket_test)
-add_subdirectory(bytearray_test)
+#add_subdirectory(bytearray_test)
+add_subdirectory(tcpserver_test)
