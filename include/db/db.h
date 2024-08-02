@@ -67,7 +67,7 @@ public:
     virtual int bindUint32(int idx, const uint32_t& value) = 0;
     virtual int bindInt64(int idx, const int64_t& value) = 0;
     virtual int bindUint64(int idx, const uint64_t& value) = 0;
-    virtual int bindFload(int idx, const float& value) = 0;
+    virtual int bindFloat(int idx, const float& value) = 0;
     virtual int bindDouble(int idx, const double& value) = 0;
     virtual int bindString(int idx, const char* value) = 0;
     virtual int bindString(int idx, const std::string& value) = 0;
@@ -101,7 +101,7 @@ public:
 
     virtual IStmt::ptr prepare(const std::string& stmt) = 0;
     virtual int getErrno() = 0;
-    virtual std::string gerErrStr() = 0;
+    virtual std::string getErrStr() = 0;
     virtual ITransaction::ptr openTransaction(bool auto_commit = false) = 0;
 };
 
